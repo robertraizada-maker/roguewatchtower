@@ -9,6 +9,7 @@ export interface RogueDeck {
     ties: number;
     rounds_played: number;
     finish_percentage: number;
+    decklist_export: string | null;
 }
 
 export interface RogueDeckResponse {

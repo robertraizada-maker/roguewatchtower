@@ -37,6 +37,7 @@ export default async function DecksOfTheDay({ date, availableDates }: Props) {
                         tournament={deck.tournament_name}
                         standing={deck.standing}
                         players={deck.tournament_players}
+                        decklistExport={deck.decklist_export}
                     />
                 ))}
             </div>

@@ -38,7 +38,12 @@ export default function DateNavigator({
     }
 
     return (
-        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div
+            className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-center"
+            style={{
+                gap: "12px",
+            }}
+        >
             <button
                 type="button"
                 disabled={!previousDate}
@@ -51,7 +56,7 @@ export default function DateNavigator({
             <select
                 value={selectedDate}
                 onChange={(e) => navigateToDate(e.target.value)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium"
+                className="min-w-[260px] rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium"
             >
                 {availableDates.map((date) => (
                     <option key={date} value={date}>
