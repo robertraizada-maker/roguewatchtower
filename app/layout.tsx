@@ -4,13 +4,18 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+const siteUrl = new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://roguewatchtower.com"
+);
+
 export const metadata: Metadata = {
+    metadataBase: siteUrl,
     title: {
-        default: "Rogue Watchtower",
+        default: "Best Rogue Pokémon TCG Decks | Rogue Watchtower",
         template: "%s | Rogue Watchtower",
     },
     description:
-        "Discover rogue Pokémon TCG decks before they become part of the meta.",
+        "Discover rogue Pokemon TCG decks before they become part of the meta.",
 };
 
 export default function RootLayout({
@@ -32,3 +37,4 @@ export default function RootLayout({
         </html>
     );
 }
+

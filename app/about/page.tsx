@@ -17,7 +17,7 @@ export default function AboutPage() {
                     </p>
 
                     <p className="mt-4 leading-7 text-slate-700">
-                        While most competitive Pokémon TCG tournaments are
+                        While most competitive Pokemon TCG tournaments are
                         dominated by established meta decks, remarkable players
                         continue to find success with innovative strategies.
                         Rogue Watchtower exists to celebrate those achievements
@@ -39,7 +39,7 @@ export default function AboutPage() {
                         Every day, tournament results published on{" "}
                         <a
                             href="https://play.limitlesstcg.com"
-                            className="font-semibold text-blue-700 hover:underline"
+                            className="font-semibold text-emerald-800 hover:underline"
                         >
                             Limitless
                         </a>{" "}
@@ -93,12 +93,12 @@ export default function AboutPage() {
                         Have a question, spotted an issue, or have an idea for
                         Rogue Watchtower? Feel free to get in touch on X at{" "}
                         <a
-                            href="https://x.com/pysak1"
+                            href="https://x.com/roguewatchtower"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-semibold text-blue-700 hover:underline"
+                            className="font-semibold text-emerald-800 hover:underline"
                         >
-                            @pysak1
+                            @roguewatchtower
                         </a>.
                     </p>
                 </div>

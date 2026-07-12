@@ -13,12 +13,13 @@ export default function Header() {
                         width={250}
                         height={125}
                         priority
+                        unoptimized
                     />
                 </Link>
 
                 <nav className="flex gap-8 text-lg font-medium">
-                    <Link href="/">Decks of the Day</Link>
-                    <Link href="/about">About</Link>
+                    <Link className="text-emerald-800 hover:underline" href="/">Decks of the Day</Link>
+                    <Link className="text-emerald-800 hover:underline" href="/about">About</Link>
                 </nav>
 
             </div>

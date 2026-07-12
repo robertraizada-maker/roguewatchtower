@@ -22,8 +22,8 @@ export default function DateNavigator({
     availableDates,
 }: DateNavigatorProps) {
     const router = useRouter();
-
-    const currentIndex = availableDates.indexOf(selectedDate);
+    const effectiveSelectedDate = selectedDate || availableDates[0] || "";
+    const currentIndex = availableDates.indexOf(effectiveSelectedDate);
 
     const newestDate = availableDates[0];
     const previousDate = availableDates[currentIndex + 1];
@@ -33,7 +33,7 @@ export default function DateNavigator({
         if (date === newestDate) {
             router.push("/");
         } else {
-            router.push(`/deck-of-the-day/${date}`);
+            router.push(`/decks-of-the-day/${date}`);
         }
     }
 
@@ -50,12 +50,13 @@ export default function DateNavigator({
                 onClick={() => navigateToDate(previousDate)}
                 className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
             >
-                ◀ Previous
+                Previous
             </button>
 
             <select
-                value={selectedDate}
+                value={effectiveSelectedDate}
                 onChange={(e) => navigateToDate(e.target.value)}
+                aria-label="Select date"
                 className="min-w-[260px] rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium"
             >
                 {availableDates.map((date) => (
@@ -71,8 +72,9 @@ export default function DateNavigator({
                 onClick={() => navigateToDate(nextDate)}
                 className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
             >
-                Next ▶
+                Next
             </button>
         </div>
     );
 }
+
