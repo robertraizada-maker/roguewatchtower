@@ -20,6 +20,7 @@ interface DeckCardProps {
     rogueRating: number;
     decklistExport: string | null;
     reportDate?: string;
+    showRogueRating?: boolean;
 }
 
 function getRankLabel(rank: number) {
@@ -69,6 +70,7 @@ export default function DeckCard({
     rogueRating,
     decklistExport,
     reportDate,
+    showRogueRating = true,
 }: DeckCardProps) {
     const finishPercent = ((standing / players) * 100).toFixed(1);
     const isOutlawAward = rank === 1 && standing === 1 && players >= 32;
@@ -179,19 +181,21 @@ export default function DeckCard({
                         </h2>
                     </div>
 
-                    <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-emerald-800 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-950">
-                        <span>Rogue Rating</span>
+                    {showRogueRating && (
+                        <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-emerald-800 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-950">
+                            <span>Rogue Rating</span>
 
-                        <span
-                            aria-label={`${rogueRating} out of 5 stars`}
-                            className="tracking-wide text-amber-500"
-                        >
-                            {"\u2605".repeat(rogueRating)}
-                            <span className="text-slate-300">
-                                {"\u2605".repeat(5 - rogueRating)}
+                            <span
+                                aria-label={`${rogueRating} out of 5 stars`}
+                                className="tracking-wide text-amber-500"
+                            >
+                                {"\u2605".repeat(rogueRating)}
+                                <span className="text-slate-300">
+                                    {"\u2605".repeat(5 - rogueRating)}
+                                </span>
                             </span>
-                        </span>
-                    </div>
+                        </div>
+                    )}
 
                     <div className="mt-4 space-y-2 text-slate-700">
                         <p>{player}</p>

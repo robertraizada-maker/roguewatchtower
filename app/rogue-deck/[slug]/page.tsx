@@ -89,6 +89,7 @@ export default async function RogueDeckPage({ params }: Props) {
                         rogueRating={deck.rogueRating}
                         decklistExport={deck.decklist_export}
                         reportDate={deck.reportDate}
+                        showRogueRating={false}
                     />
                 ))}
             </div>
