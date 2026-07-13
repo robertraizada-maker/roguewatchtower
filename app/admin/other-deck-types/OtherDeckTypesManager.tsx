@@ -285,7 +285,11 @@ export default function OtherDeckTypesManager() {
     );
 
     const pokemonLines = useMemo(
-        () => getPokemonLines(nextCandidate?.decklistExport ?? null),
+        () =>
+            getPokemonLines(nextCandidate?.decklistExport ?? null)
+                .map(parsePokemonCardLine)
+                .filter((card): card is PokemonCardLine => card !== null)
+                .map((card) => `${card.quantity} ${card.name}`),
         [nextCandidate]
     );
 
@@ -335,7 +339,6 @@ export default function OtherDeckTypesManager() {
                             value={archetype}
                             onChange={(event) => setArchetype(event.target.value)}
                             className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-emerald-700"
-                            placeholder="Drakloak Control"
                         />
                     </label>
 
@@ -345,7 +348,6 @@ export default function OtherDeckTypesManager() {
                             value={criteriaText}
                             onChange={(event) => setCriteriaText(event.target.value)}
                             className="mt-2 min-h-44 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm text-slate-900 outline-none focus:border-emerald-700"
-                            placeholder={"3 Dreepy\n3 Drakloak\n1 Elgyem"}
                         />
                     </label>
 
@@ -383,7 +385,7 @@ export default function OtherDeckTypesManager() {
                                         Other deck to classify
                                     </h2>
                                     <p className="mt-1 text-sm text-slate-600">
-                                        {formatDate(nextCandidate.reportDate)} Ã‚- Daily rank #{nextCandidate.dailyRank}
+                                        {formatDate(nextCandidate.reportDate)} - Daily rank #{nextCandidate.dailyRank}
                                     </p>
                                 </div>
 
