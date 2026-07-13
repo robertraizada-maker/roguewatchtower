@@ -8,13 +8,20 @@ interface DateNavigatorProps {
 }
 
 function formatDate(date: string) {
-    return new Date(date + "T00:00:00Z").toLocaleDateString("en-GB", {
+    const parts = new Intl.DateTimeFormat("en-GB", {
         weekday: "long",
         day: "numeric",
         month: "long",
-        year: "numeric",
         timeZone: "UTC",
-    });
+    }).formatToParts(new Date(date + "T00:00:00Z"));
+
+    const weekday = parts.find((part) => part.type === "weekday")?.value;
+    const day = parts.find((part) => part.type === "day")?.value;
+    const month = parts.find((part) => part.type === "month")?.value;
+
+    return [weekday, [day, month].filter(Boolean).join(" ")]
+        .filter(Boolean)
+        .join(", ");
 }
 
 export default function DateNavigator({
