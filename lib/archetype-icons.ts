@@ -109,6 +109,14 @@ function getArchetypePokemonNames(archetype: string) {
     let remaining = archetype.trim();
 
     while (remaining && names.length < 2) {
+        const megaFallbackMatch = /^mega\s+(\S+)/i.exec(remaining);
+
+        if (megaFallbackMatch) {
+            names.push(megaFallbackMatch[1]);
+            remaining = remaining.slice(megaFallbackMatch[0].length).trim();
+            continue;
+        }
+
         const matchedName = MULTI_WORD_ICON_NAMES.find((name) =>
             remaining.toLowerCase().startsWith(name.toLowerCase())
         );
