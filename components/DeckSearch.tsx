@@ -1,9 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 
+import { getDeckDisplayName } from "@/lib/deck-display";
 import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
+import {
+    defaultOtherDeckTypes,
+    OTHER_DECK_TYPES_STORAGE_KEY,
+    parseOtherDeckTypeCriteria,
+    type OtherDeckType,
+} from "@/lib/other-deck-types";
 import { getDeckAnchorId } from "@/lib/rogue-rating";
 import { RogueDeck } from "@/types/rogue";
 
@@ -20,6 +27,11 @@ interface Props {
 interface SearchResult {
     deck: SearchableDeck;
     matches: string[];
+}
+
+interface StoredOtherDeckType {
+    archetype: string;
+    criteriaText: string;
 }
 
 function formatDate(date: string) {
@@ -64,7 +76,7 @@ function getPokemonLines(decklist: string | null) {
 }
 
 function getPokemonName(line: string) {
-    const match = line.match(/^\d+\s+(.+)\s+[A-Z0-9]{2,5}\s+[A-Z]*\d+[a-z]?$/);
+    const match = line.match(/^\d+\s+(.+)\s+[A-Z0-9]{2,8}\s+[A-Z]*\d+[a-z]?(?:\/\d+)?$/i);
     return match?.[1] ?? line;
 }
 
@@ -76,6 +88,52 @@ function getAvailablePokemon(decks: SearchableDeck[]) {
             )
         )
     ).sort((a, b) => a.localeCompare(b));
+}
+
+function parseStoredOtherDeckTypes(storedValue: string | null) {
+    if (!storedValue) {
+        return undefined;
+    }
+
+    try {
+        const storedDeckTypes = JSON.parse(storedValue) as StoredOtherDeckType[];
+
+        if (!Array.isArray(storedDeckTypes)) {
+            return undefined;
+        }
+
+        const otherDeckTypes = storedDeckTypes
+            .map((deckType): OtherDeckType | null => {
+                const archetype = deckType.archetype?.trim();
+                const criteria = parseOtherDeckTypeCriteria(deckType.criteriaText ?? "");
+
+                if (!archetype || criteria.length === 0) {
+                    return null;
+                }
+
+                return {
+                    archetype,
+                    criteria,
+                };
+            })
+            .filter((deckType): deckType is OtherDeckType => deckType !== null);
+
+        return otherDeckTypes.length > 0
+            ? [...defaultOtherDeckTypes, ...otherDeckTypes]
+            : undefined;
+    } catch {
+        return undefined;
+    }
+}
+
+function subscribeToStoredOtherDeckTypes(onStoreChange: () => void) {
+    window.addEventListener("storage", onStoreChange);
+
+    return () => window.removeEventListener("storage", onStoreChange);
+}
+
+function getStoredOtherDeckTypesSnapshot() {
+    return window.localStorage.getItem(OTHER_DECK_TYPES_STORAGE_KEY);
 }
 
 function searchDecks(decks: SearchableDeck[], query: string): SearchResult[] {
@@ -109,6 +167,15 @@ function searchDecks(decks: SearchableDeck[], query: string): SearchResult[] {
 export default function DeckSearch({ decks }: Props) {
     const [query, setQuery] = useState("");
     const [selectedPokemon, setSelectedPokemon] = useState("");
+    const storedOtherDeckTypesSnapshot = useSyncExternalStore(
+        subscribeToStoredOtherDeckTypes,
+        getStoredOtherDeckTypesSnapshot,
+        () => null
+    );
+    const storedOtherDeckTypes = useMemo(
+        () => parseStoredOtherDeckTypes(storedOtherDeckTypesSnapshot),
+        [storedOtherDeckTypesSnapshot]
+    );
     const availablePokemon = useMemo(() => getAvailablePokemon(decks), [decks]);
     const activeQuery = selectedPokemon || query;
     const results = useMemo(() => searchDecks(decks, activeQuery), [decks, activeQuery]);
@@ -187,7 +254,11 @@ export default function DeckSearch({ decks }: Props) {
                                         href={`/decks-of-the-day/${deck.reportDate}#${getDeckAnchorId(deck)}`}
                                         className="font-bold text-emerald-800 hover:underline"
                                     >
-                                        {deck.deck_name}
+                                        {getDeckDisplayName(
+                                            deck.deck_name,
+                                            deck.decklist_export,
+                                            storedOtherDeckTypes
+                                        )}
                                     </Link>
                                     <div className="mt-1 text-xs text-slate-500">
                                         Daily rank #{deck.dailyRank}
@@ -266,4 +337,3 @@ export default function DeckSearch({ decks }: Props) {
         </div>
     );
 }
-

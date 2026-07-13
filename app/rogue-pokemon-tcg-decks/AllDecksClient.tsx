@@ -7,6 +7,7 @@ import { useMemo, useSyncExternalStore } from "react";
 import { getArchetypeIconUrls, slugifyPokemonName } from "@/lib/archetype-icons";
 import { getDeckDisplayName } from "@/lib/deck-display";
 import {
+    defaultOtherDeckTypes,
     OTHER_DECK_TYPES_STORAGE_KEY,
     parseOtherDeckTypeCriteria,
     type OtherDeckType,
@@ -62,7 +63,9 @@ function parseStoredOtherDeckTypes(storedValue: string | null) {
             })
             .filter((deckType): deckType is OtherDeckType => deckType !== null);
 
-        return otherDeckTypes.length > 0 ? otherDeckTypes : undefined;
+        return otherDeckTypes.length > 0
+            ? [...defaultOtherDeckTypes, ...otherDeckTypes]
+            : undefined;
     } catch {
         return undefined;
     }
