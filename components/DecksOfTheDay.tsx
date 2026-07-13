@@ -15,11 +15,11 @@ export default async function DecksOfTheDay({ date, availableDates }: Props) {
         <div className="space-y-6">
             <div>
                 <h1 className="text-4xl font-bold">
-                    Rogue Decks of the Day
+                    Pokémon TCG Rogue Decks
                 </h1>
 
                 <p className="mt-3 text-slate-600">
-                    The best rogue Pokémon TCG decks from recent Standard tournaments.
+                    Rogue Watchtower tracks the best Pokémon TCG rogue decks from tournaments around the world every day. Discover the highest-performing rogue decks, Rogue Rankings and Decks of the Day.
                 </p>
             </div>
 

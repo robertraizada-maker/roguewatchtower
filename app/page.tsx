@@ -1,13 +1,26 @@
+import type { Metadata } from "next";
+
 import DecksOfTheDay from "@/components/DecksOfTheDay";
 import DateNavigator from "@/components/DateNavigator";
 import { getAvailableDates } from "@/lib/api";
+export const metadata: Metadata = {
+    title: {
+        absolute: "Pokémon TCG Rogue Decks | Daily Rogue Deck Rankings | Rogue Watchtower",
+    },
+    description:
+        "Rogue Watchtower tracks the best Pokémon TCG rogue decks from tournaments around the world every day.",
+};
 
 function EmptyDecksOfTheDay({ message }: { message: string }) {
     return (
         <div className="space-y-6">
             <h1 className="text-4xl font-bold">
-                Rogue Decks of the Day
+                Pokémon TCG Rogue Decks
             </h1>
+
+            <p className="mt-3 text-slate-600">
+                Rogue Watchtower tracks the best Pokémon TCG rogue decks from tournaments around the world every day. Discover the highest-performing rogue decks, Rogue Rankings and Decks of the Day.
+            </p>
 
             <DateNavigator
                 selectedDate=""
