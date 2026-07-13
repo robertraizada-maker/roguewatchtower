@@ -1,3 +1,9 @@
+import {
+    findMatchingFeaturedOtherDeckType,
+    findMatchingOtherDeckType,
+    normalisePokemonName,
+} from "@/lib/other-deck-types";
+
 interface PokemonCardLine {
     quantity: number;
     name: string;
@@ -27,7 +33,7 @@ function parsePokemonCardLine(line: string, order: number): PokemonCardLine | nu
 function getPokemonLines(decklistExport: string) {
     const lines = decklistExport.split(/\r?\n/);
     const pokemonHeaderIndex = lines.findIndex((line) =>
-        /^pok[eé]mon:/i.test(line.trim())
+        /^pok.mon:/i.test(line.trim())
     );
 
     if (pokemonHeaderIndex === -1) {
@@ -92,12 +98,42 @@ function getFeaturedPokemonNames(decklistExport: string | null) {
     return cards.map((card) => card.name);
 }
 
+function getPokemonCounts(decklistExport: string | null) {
+    const counts = new Map<string, number>();
+
+    if (!decklistExport) {
+        return counts;
+    }
+
+    getPokemonLines(decklistExport)
+        .map((line, index) => parsePokemonCardLine(line, index))
+        .filter((card): card is PokemonCardLine => card !== null)
+        .forEach((card) => {
+            const name = normalisePokemonName(card.name);
+            counts.set(name, (counts.get(name) ?? 0) + card.quantity);
+        });
+
+    return counts;
+}
+
 export function getDeckDisplayName(deckName: string, decklistExport: string | null) {
     if (deckName !== "Other") {
         return deckName;
     }
 
+    const matchingDeckType = findMatchingOtherDeckType(getPokemonCounts(decklistExport));
+
+    if (matchingDeckType) {
+        return matchingDeckType.archetype;
+    }
+
     const featuredPokemonNames = getFeaturedPokemonNames(decklistExport);
+    const matchingFeaturedDeckType =
+        findMatchingFeaturedOtherDeckType(featuredPokemonNames);
+
+    if (matchingFeaturedDeckType) {
+        return matchingFeaturedDeckType.archetype;
+    }
 
     if (featuredPokemonNames.length === 0) {
         return deckName;
