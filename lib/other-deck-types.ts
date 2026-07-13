@@ -56,6 +56,28 @@ export function normalisePokemonName(name: string) {
     return name.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
+function getMatchingPokemonCount(
+    pokemonCounts: Map<string, number>,
+    pokemonName: string
+) {
+    const normalisedPokemonName = normalisePokemonName(pokemonName);
+    const exactCount = pokemonCounts.get(normalisedPokemonName);
+
+    if (exactCount !== undefined) {
+        return exactCount;
+    }
+
+    let matchingCount = 0;
+
+    pokemonCounts.forEach((count, cardName) => {
+        if (cardName.startsWith(`${normalisedPokemonName} `)) {
+            matchingCount += count;
+        }
+    });
+
+    return matchingCount;
+}
+
 export function findMatchingOtherDeckType(
     pokemonCounts: Map<string, number>,
     otherDeckTypes: OtherDeckType[] = defaultOtherDeckTypes
@@ -63,8 +85,10 @@ export function findMatchingOtherDeckType(
     return (
         otherDeckTypes.find((deckType) =>
             deckType.criteria.every((criterion) => {
-                const count =
-                    pokemonCounts.get(normalisePokemonName(criterion.pokemonName)) ?? 0;
+                const count = getMatchingPokemonCount(
+                    pokemonCounts,
+                    criterion.pokemonName
+                );
 
                 return count >= criterion.minQuantity;
             })
