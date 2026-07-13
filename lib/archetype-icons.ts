@@ -15,6 +15,42 @@ const ARCHETYPE_ICON_SLUGS: Record<string, string[]> = {
     "Other": ["https://limitless3.nyc3.cdn.digitaloceanspaces.com/pokemon/substitute.png"],
 };
 
+const ICON_NAME_OVERRIDES: Record<string, string> = {
+    "iono's bellibolt": "bellibolt",
+    "lillie's clefairy": "clefairy",
+    "marnie's grimmsnarl": "grimmsnarl",
+    "mega charizard x": "charizard-mega-x",
+    "misty's gyarados": "gyarados",
+    "paldean tauros": "tauros",
+    "rocket's spidops": "spidops",
+    "team rocket's chingling": "chingling",
+    "team rocket's golbat": "golbat",
+    "team rocket's zubat": "zubat",
+    "teal mask ogerpon": "ogerpon",
+};
+const MULTI_WORD_ICON_NAMES = [
+    "Team Rocket's Golbat",
+    "Team Rocket's Zubat",
+    "Team Rocket's Chingling",
+    "Teal Mask Ogerpon",
+    "Mega Charizard X",
+    "Marnie's Grimmsnarl",
+    "Misty's Gyarados",
+    "Lillie's Clefairy",
+    "Iono's Bellibolt",
+    "Paldean Tauros",
+    "Rocket's Spidops",
+    "Mega Abomasnow",
+    "Mega Camerupt",
+    "Mega Dragonite",
+    "Mega Lopunny",
+    "Mega Manectric",
+    "Mega Gengar",
+    "Mega Zygarde",
+    "Iron Thorns",
+    "Raging Bolt",
+].sort((a, b) => b.length - a.length);
+
 export function slugifyPokemonName(name: string) {
     return name
         .replace(/'s\b/gi, "")
@@ -24,6 +60,27 @@ export function slugifyPokemonName(name: string) {
         .replace(/-+/g, "-")
         .replace(/^-+|-+$/g, "")
         .toLowerCase();
+}
+
+function getIconSlug(name: string) {
+    const normalized = name
+        .trim()
+        .replace(/\s+/g, " ")
+        .replace(/\bex\b/gi, "")
+        .trim()
+        .toLowerCase();
+
+    if (ICON_NAME_OVERRIDES[normalized]) {
+        return ICON_NAME_OVERRIDES[normalized];
+    }
+
+    const megaMatch = /^mega\s+(.+)$/.exec(normalized);
+
+    if (megaMatch) {
+        return `${slugifyPokemonName(megaMatch[1])}-mega`;
+    }
+
+    return slugifyPokemonName(normalized);
 }
 
 function getOtherPokemonNames(archetype: string) {
@@ -38,6 +95,35 @@ function getOtherPokemonNames(archetype: string) {
         .filter(Boolean);
 }
 
+function getArchetypePokemonNames(archetype: string) {
+    const otherPokemonNames = getOtherPokemonNames(archetype);
+
+    if (otherPokemonNames.length > 0) {
+        return otherPokemonNames;
+    }
+
+    const names: string[] = [];
+    let remaining = archetype.trim();
+
+    while (remaining && names.length < 2) {
+        const matchedName = MULTI_WORD_ICON_NAMES.find((name) =>
+            remaining.toLowerCase().startsWith(name.toLowerCase())
+        );
+
+        if (matchedName) {
+            names.push(matchedName);
+            remaining = remaining.slice(matchedName.length).trim();
+            continue;
+        }
+
+        const [name, ...rest] = remaining.split(/\s+/);
+        names.push(name);
+        remaining = rest.join(" ").trim();
+    }
+
+    return names.filter(Boolean);
+}
+
 export function getArchetypeIconUrls(
     archetype: string,
     explicitIconUrls?: string[]
@@ -46,16 +132,9 @@ export function getArchetypeIconUrls(
         return explicitIconUrls;
     }
 
-    const otherPokemonNames = getOtherPokemonNames(archetype);
     const slugs =
         ARCHETYPE_ICON_SLUGS[archetype] ||
-        (otherPokemonNames.length > 0
-            ? otherPokemonNames.map(slugifyPokemonName)
-            : archetype
-                  .split(/\s+/)
-                  .slice(0, 2)
-                  .map(slugifyPokemonName))
-            .filter(Boolean);
+        getArchetypePokemonNames(archetype).map(getIconSlug).filter(Boolean);
 
     return slugs.map((slug) =>
         slug.startsWith("http") ? slug : `${ICON_BASE_URL}/${slug}.png`
