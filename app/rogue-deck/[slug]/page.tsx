@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!archetype) {
         return {
-            title: "Archetype",
+            title: "Rogue Deck",
         };
     }
 
@@ -33,18 +33,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: `${archetype.name} Rogue Decks`,
         description: `Recent Pokemon TCG rogue deck results for ${archetype.name}.`,
         alternates: {
-            canonical: `/archtypes/${archetype.slug}`,
+            canonical: `/rogue-deck/${archetype.slug}`,
         },
     };
 }
 
-export default async function ArchetypePage({ params }: Props) {
+export default async function RogueDeckPage({ params }: Props) {
     const { slug } = await params;
     const archetype = await getArchetypeBySlug(slug);
 
     if (!archetype) {
         notFound();
     }
+
+    const decks = [...archetype.decks].sort((a, b) => {
+        if (a.finish_percentage !== b.finish_percentage) {
+            return a.finish_percentage - b.finish_percentage;
+        }
+
+        if (b.rogueRating !== a.rogueRating) {
+            return b.rogueRating - a.rogueRating;
+        }
+
+        return b.tournament_players - a.tournament_players;
+    });
 
     return (
         <main className="space-y-4 sm:space-y-6">
@@ -53,15 +65,15 @@ export default async function ArchetypePage({ params }: Props) {
                     {archetype.name} Rogue Decks
                 </h1>
                 <p className="mt-2 text-slate-600 sm:mt-3">
-                    All {archetype.deckCount} recent rogue deck result{archetype.deckCount === 1 ? "" : "s"} for this archetype from the last 28 days.
+                    All {archetype.deckCount} recent rogue deck result{archetype.deckCount === 1 ? "" : "s"} for this deck from the last 28 days, ordered by finish percentage.
                 </p>
             </div>
 
             <div className="space-y-4 sm:space-y-5">
-                {archetype.decks.map((deck) => (
+                {decks.map((deck, index) => (
                     <DeckCard
                         key={`${deck.reportDate}-${deck.tournament_name}-${deck.player_name}-${deck.deck_name}`}
-                        rank={deck.dailyRank}
+                        rank={index + 1}
                         anchorId={getDeckAnchorId(deck)}
                         archetype={deck.deck_name}
                         archetypeIcons={
@@ -76,6 +88,7 @@ export default async function ArchetypePage({ params }: Props) {
                         players={deck.tournament_players}
                         rogueRating={deck.rogueRating}
                         decklistExport={deck.decklist_export}
+                        reportDate={deck.reportDate}
                     />
                 ))}
             </div>

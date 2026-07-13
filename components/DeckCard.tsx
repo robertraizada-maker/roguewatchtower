@@ -19,6 +19,7 @@ interface DeckCardProps {
     players: number;
     rogueRating: number;
     decklistExport: string | null;
+    reportDate?: string;
 }
 
 function getRankLabel(rank: number) {
@@ -26,6 +27,16 @@ function getRankLabel(rank: number) {
     if (rank === 2) return "\uD83E\uDD48 Runner-up";
     if (rank === 3) return "\uD83E\uDD49 Third Place";
     return `${rank}.`;
+}
+
+function formatCompetitionDate(date: string) {
+    return new Intl.DateTimeFormat("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+    }).format(new Date(`${date}T00:00:00Z`));
 }
 
 function getOrdinal(value: number) {
@@ -57,6 +68,7 @@ export default function DeckCard({
     players,
     rogueRating,
     decklistExport,
+    reportDate,
 }: DeckCardProps) {
     const finishPercent = ((standing / players) * 100).toFixed(1);
     const isOutlawAward = rank === 1 && standing === 1 && players >= 32;
@@ -183,6 +195,10 @@ export default function DeckCard({
 
                     <div className="mt-4 space-y-2 text-slate-700">
                         <p>{player}</p>
+
+                        {reportDate && (
+                            <p>Competition date: {formatCompetitionDate(reportDate)}</p>
+                        )}
 
                         <p>{isOutlawAward
                                 ? `Won a ${players}-player tournament`

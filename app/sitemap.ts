@@ -45,13 +45,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.7,
         })),
         {
-            url: absoluteUrl("/archtypes"),
+            url: absoluteUrl("/rogue-pokemon-tcg-decks"),
             lastModified: now,
             changeFrequency: "daily",
             priority: 0.8,
         },
         ...archetypes.map((archetype) => ({
-            url: absoluteUrl(`/archtypes/${archetype.slug}`),
+            url: absoluteUrl(`/rogue-deck/${archetype.slug}`),
             lastModified: now,
             changeFrequency: "weekly" as const,
             priority: 0.6,

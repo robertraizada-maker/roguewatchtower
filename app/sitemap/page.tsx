@@ -60,8 +60,8 @@ export default async function SitemapPage() {
                         </Link>
                     </li>
                     <li>
-                        <Link className="font-medium text-emerald-800 hover:underline" href="/archtypes">
-                            Archetypes
+                        <Link className="font-medium text-emerald-800 hover:underline" href="/rogue-pokemon-tcg-decks">
+                            All decks
                         </Link>
                     </li>
                     <li>
