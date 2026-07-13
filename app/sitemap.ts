@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAvailableDates } from "@/lib/api";
 import { filterAccurateReportDates } from "@/lib/accurate-dates";
+import { getArchetypes } from "@/lib/archetypes";
 import { getRankingRangeHref } from "@/lib/ranking-ranges";
 
 export const dynamic = "force-static";
@@ -16,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const result = await getAvailableDates();
     const now = new Date();
     const accurateDates = filterAccurateReportDates(result.dates, now);
+    const archetypes = await getArchetypes();
 
     return [
         {
@@ -41,6 +43,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             lastModified: now,
             changeFrequency: "daily" as const,
             priority: 0.7,
+        })),
+        {
+            url: absoluteUrl("/archtypes"),
+            lastModified: now,
+            changeFrequency: "daily",
+            priority: 0.8,
+        },
+        ...archetypes.map((archetype) => ({
+            url: absoluteUrl(`/archtypes/${archetype.slug}`),
+            lastModified: now,
+            changeFrequency: "weekly" as const,
+            priority: 0.6,
         })),
         {
             url: absoluteUrl("/search"),

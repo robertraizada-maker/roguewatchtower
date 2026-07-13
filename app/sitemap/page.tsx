@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAvailableDates, getRogueDecks } from "@/lib/api";
 import { filterAccurateReportDates } from "@/lib/accurate-dates";
+import { getDeckDisplayName } from "@/lib/deck-display";
 
 export const metadata: Metadata = {
     title: "Sitemap",
@@ -28,7 +29,9 @@ export default async function SitemapPage() {
 
             return {
                 date,
-                archetype: topDeck?.deck_name ?? "No rogue deck found",
+                archetype: topDeck
+                    ? getDeckDisplayName(topDeck.deck_name, topDeck.decklist_export)
+                    : "No rogue deck found",
                 player: topDeck?.player_name ?? "Unknown player",
             };
         })
@@ -54,6 +57,11 @@ export default async function SitemapPage() {
                     <li>
                         <Link className="font-medium text-emerald-800 hover:underline" href="/rogue-ranking">
                             Rogue Ranking
+                        </Link>
+                    </li>
+                    <li>
+                        <Link className="font-medium text-emerald-800 hover:underline" href="/archtypes">
+                            Archetypes
                         </Link>
                     </li>
                     <li>

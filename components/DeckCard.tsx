@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
+import { getArchetypeIconUrls } from "@/lib/archetype-icons";
 import { getDeckDisplayName } from "@/lib/deck-display";
 import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
 
@@ -44,44 +45,6 @@ function getOrdinal(value: number) {
     }
 }
 
-const ICON_BASE_URL = "https://r2.limitlesstcg.net/pokemon/gen9";
-
-const ARCHETYPE_ICON_SLUGS: Record<string, string[]> = {
-    "Blissey": ["blissey"],
-    "Crustle": ["crustle"],
-    "Dragapult Blaziken": ["dragapult", "blaziken"],
-    "Dragapult Iron Thorns": ["dragapult", "iron-thorns"],
-    "Erika's Victreebel": ["victreebel"],
-    "Heatran Metang": ["heatran", "metang"],
-    "Mega Lopunny": ["lopunny-mega"],
-    "Okidogi Barbaracle": ["okidogi", "barbaracle"],
-    "Other": ["https://limitless3.nyc3.cdn.digitaloceanspaces.com/pokemon/substitute.png"],
-};
-
-function slugifyPokemonName(name: string) {
-    return name
-        .replace(/'s\b/gi, "")
-        .replace(/\bex\b/gi, "")
-        .replace(/\bmega\s+([a-z]+)/gi, "$1-mega")
-        .replace(/[^a-z0-9-]+/gi, "-")
-        .replace(/^-+|-+$/g, "")
-        .toLowerCase();
-}
-
-function getFallbackIconUrls(archetype: string) {
-    const slugs =
-        ARCHETYPE_ICON_SLUGS[archetype] ||
-        archetype
-            .split(/\s+/)
-            .slice(0, 2)
-            .map(slugifyPokemonName)
-            .filter(Boolean);
-
-    return slugs.map((slug) =>
-        slug.startsWith("http") ? slug : `${ICON_BASE_URL}/${slug}.png`
-    );
-}
-
 export default function DeckCard({
     rank,
     anchorId,
@@ -100,9 +63,7 @@ export default function DeckCard({
     const displayArchetype = getDeckDisplayName(archetype, decklistExport);
     const tournamentUrl = getLimitlessTournamentDetailsUrl(tournamentId);
     const iconUrls =
-        archetypeIcons && archetypeIcons.length > 0
-            ? archetypeIcons
-            : getFallbackIconUrls(archetype);
+        getArchetypeIconUrls(displayArchetype, archetypeIcons);
 
     const [copied, setCopied] = useState(false);
 

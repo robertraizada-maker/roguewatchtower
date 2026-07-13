@@ -7,6 +7,7 @@ import { useState } from "react";
 const navLinks = [
     { href: "/", label: "Decks of the Day" },
     { href: "/rogue-ranking", label: "Rogue Ranking" },
+    { href: "/archtypes", label: "Archetypes" },
     { href: "/search", label: "Search" },
     { href: "/about", label: "About" },
 ];
@@ -52,7 +53,7 @@ export default function Header() {
                     </span>
                 </button>
 
-                <nav className="hidden gap-8 text-lg font-medium md:flex">
+                <nav className="hidden gap-4 text-base font-medium md:flex lg:gap-8 lg:text-lg">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
