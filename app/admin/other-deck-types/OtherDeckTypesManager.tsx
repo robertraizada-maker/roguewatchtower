@@ -1,11 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     defaultOtherDeckTypes,
+    findMatchingOtherDeckType,
     formatOtherDeckTypeCriteria,
+    normalisePokemonName,
     parseOtherDeckTypeCriteria,
+    type OtherDeckType,
 } from "@/lib/other-deck-types";
+import type { AvailableDatesResponse, RogueDeckResponse } from "@/types/rogue";
 
 interface EditableOtherDeckType {
     id: string;
@@ -13,151 +17,452 @@ interface EditableOtherDeckType {
     criteriaText: string;
 }
 
+interface OtherDeckCandidate {
+    id: string;
+    reportDate: string;
+    dailyRank: number;
+    playerName: string;
+    tournamentName: string;
+    standing: number;
+    players: number;
+    decklistExport: string | null;
+}
+
+interface PokemonCardLine {
+    quantity: number;
+    name: string;
+}
+
+const STORAGE_KEY = "roguewatchtower:other-deck-types";
+const MAX_DATES_TO_SCAN = 28;
+
 const initialDeckTypes: EditableOtherDeckType[] = defaultOtherDeckTypes.map(
     (deckType, index) => ({
-        id: `${index}-${deckType.archetype}`,
+        id: `seed-${index}-${deckType.archetype}`,
         archetype: deckType.archetype,
         criteriaText: formatOtherDeckTypeCriteria(deckType.criteria),
     })
 );
 
-export default function OtherDeckTypesManager() {
-    const [deckTypes, setDeckTypes] = useState(initialDeckTypes);
+function parsePokemonCardLine(line: string): PokemonCardLine | null {
+    const match = /^(\d+)\s+(.+)\s+[A-Z0-9]{2,8}\s+[A-Z]*\d+[a-z]?$/i.exec(
+        line.trim()
+    );
 
-    const parsedDeckTypes = useMemo(
-        () =>
-            deckTypes.map((deckType) => ({
-                ...deckType,
-                criteria: parseOtherDeckTypeCriteria(deckType.criteriaText),
-            })),
+    if (!match) {
+        return null;
+    }
+
+    return {
+        quantity: Number(match[1]),
+        name: match[2].trim(),
+    };
+}
+
+function getPokemonLines(decklistExport: string | null) {
+    if (!decklistExport) {
+        return [];
+    }
+
+    const lines = decklistExport.split(/\r?\n/);
+    const pokemonHeaderIndex = lines.findIndex((line) =>
+        /^pok.mon:/i.test(line.trim())
+    );
+
+    if (pokemonHeaderIndex === -1) {
+        return [];
+    }
+
+    const pokemonLines: string[] = [];
+
+    for (const line of lines.slice(pokemonHeaderIndex + 1)) {
+        const trimmed = line.trim();
+
+        if (!trimmed) {
+            continue;
+        }
+
+        if (/^(trainer|energy):/i.test(trimmed)) {
+            break;
+        }
+
+        pokemonLines.push(trimmed);
+    }
+
+    return pokemonLines;
+}
+
+function getPokemonCounts(decklistExport: string | null) {
+    const counts = new Map<string, number>();
+
+    getPokemonLines(decklistExport)
+        .map(parsePokemonCardLine)
+        .filter((card): card is PokemonCardLine => card !== null)
+        .forEach((card) => {
+            const name = normalisePokemonName(card.name);
+            counts.set(name, (counts.get(name) ?? 0) + card.quantity);
+        });
+
+    return counts;
+}
+
+function toDeckType(deckType: EditableOtherDeckType): OtherDeckType | null {
+    const archetype = deckType.archetype.trim();
+    const criteria = parseOtherDeckTypeCriteria(deckType.criteriaText);
+
+    if (!archetype || criteria.length === 0) {
+        return null;
+    }
+
+    return {
+        archetype,
+        criteria,
+    };
+}
+
+function formatDate(date: string) {
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+    }).format(new Date(`${date}T00:00:00Z`));
+}
+
+function getCandidateId(candidate: Omit<OtherDeckCandidate, "id">) {
+    return [
+        candidate.reportDate,
+        candidate.dailyRank,
+        candidate.playerName,
+        candidate.tournamentName,
+    ].join("|");
+}
+
+function loadStoredDeckTypes() {
+    if (typeof window === "undefined") {
+        return initialDeckTypes;
+    }
+
+    const storedValue = window.localStorage.getItem(STORAGE_KEY);
+
+    if (!storedValue) {
+        return initialDeckTypes;
+    }
+
+    try {
+        const parsedValue = JSON.parse(storedValue) as EditableOtherDeckType[];
+
+        if (!Array.isArray(parsedValue)) {
+            return initialDeckTypes;
+        }
+
+        return parsedValue;
+    } catch {
+        return initialDeckTypes;
+    }
+}
+
+export default function OtherDeckTypesManager() {
+    const [deckTypes, setDeckTypes] = useState<EditableOtherDeckType[]>(loadStoredDeckTypes);
+    const [archetype, setArchetype] = useState("");
+    const [criteriaText, setCriteriaText] = useState("");
+    const [candidates, setCandidates] = useState<OtherDeckCandidate[]>([]);
+    const [isLoadingCandidates, setIsLoadingCandidates] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [saveStatus, setSaveStatus] = useState<string | null>(null);
+
+
+    useEffect(() => {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(deckTypes));
+    }, [deckTypes]);
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        async function loadCandidates() {
+            const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+            if (!baseUrl) {
+                setLoadError("NEXT_PUBLIC_API_BASE_URL is not configured.");
+                setIsLoadingCandidates(false);
+                return;
+            }
+
+            try {
+                setIsLoadingCandidates(true);
+                setLoadError(null);
+
+                const datesResponse = await fetch(`${baseUrl}/meta/available-dates`);
+
+                if (!datesResponse.ok) {
+                    throw new Error("Failed to load available dates.");
+                }
+
+                const datesData = (await datesResponse.json()) as AvailableDatesResponse;
+                const dates = (datesData.dates ?? []).slice(0, MAX_DATES_TO_SCAN);
+                const dailyResults = await Promise.all(
+                    dates.map(async (date) => {
+                        const response = await fetch(`${baseUrl}/meta/rogue?date=${date}`);
+
+                        if (!response.ok) {
+                            throw new Error(`Failed to load rogue decks for ${date}.`);
+                        }
+
+                        const data = (await response.json()) as RogueDeckResponse;
+                        return { date, decks: data.rogueDecks ?? [] };
+                    })
+                );
+
+                if (isCancelled) {
+                    return;
+                }
+
+                setCandidates(
+                    dailyResults.flatMap(({ date, decks }) =>
+                        decks
+                            .map((deck, index) => ({ deck, index }))
+                            .filter(({ deck }) => deck.deck_name === "Other")
+                            .map(({ deck, index }) => {
+                                const candidate = {
+                                    reportDate: date,
+                                    dailyRank: index + 1,
+                                    playerName: deck.player_name,
+                                    tournamentName: deck.tournament_name,
+                                    standing: deck.standing,
+                                    players: deck.tournament_players,
+                                    decklistExport: deck.decklist_export,
+                                };
+
+                                return {
+                                    ...candidate,
+                                    id: getCandidateId(candidate),
+                                };
+                            })
+                    )
+                );
+            } catch (error) {
+                if (!isCancelled) {
+                    setLoadError(
+                        error instanceof Error
+                            ? error.message
+                            : "Failed to load Other decks."
+                    );
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsLoadingCandidates(false);
+                }
+            }
+        }
+
+        loadCandidates();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, []);
+
+    const validDeckTypes = useMemo(
+        () => deckTypes.map(toDeckType).filter((deckType): deckType is OtherDeckType => deckType !== null),
         [deckTypes]
     );
 
-    function updateDeckType(
-        id: string,
-        field: "archetype" | "criteriaText",
-        value: string
-    ) {
-        setDeckTypes((currentDeckTypes) =>
-            currentDeckTypes.map((deckType) =>
-                deckType.id === id ? { ...deckType, [field]: value } : deckType
-            )
-        );
-    }
+    const nextCandidate = useMemo(
+        () =>
+            candidates.find(
+                (candidate) =>
+                    !findMatchingOtherDeckType(
+                        getPokemonCounts(candidate.decklistExport),
+                        validDeckTypes
+                    )
+            ) ?? null,
+        [candidates, validDeckTypes]
+    );
 
-    function addDeckType() {
+    const parsedCriteria = useMemo(
+        () => parseOtherDeckTypeCriteria(criteriaText),
+        [criteriaText]
+    );
+
+    const pokemonLines = useMemo(
+        () => getPokemonLines(nextCandidate?.decklistExport ?? null),
+        [nextCandidate]
+    );
+
+    function saveDeckType() {
+        const trimmedArchetype = archetype.trim();
+
+        if (!trimmedArchetype || parsedCriteria.length === 0) {
+            setSaveStatus("Add an archetype name and at least one valid criteria line.");
+            return;
+        }
+
         setDeckTypes((currentDeckTypes) => [
             ...currentDeckTypes,
             {
-                id: `new-${Date.now()}`,
-                archetype: "",
-                criteriaText: "",
+                id: `saved-${Date.now()}`,
+                archetype: trimmedArchetype,
+                criteriaText: formatOtherDeckTypeCriteria(parsedCriteria),
             },
         ]);
+        setArchetype("");
+        setCriteriaText("");
+        setSaveStatus("Saved");
     }
 
-    function removeDeckType(id: string) {
+    function deleteDeckType(id: string) {
         setDeckTypes((currentDeckTypes) =>
             currentDeckTypes.filter((deckType) => deckType.id !== id)
         );
+        setSaveStatus("Deleted");
     }
 
     return (
-        <div className="mt-8 space-y-6">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-                Rules are checked from top to bottom. Only decks named Other are renamed,
-                and the first rule where every line meets the minimum Pokemon count wins.
-            </div>
+        <div className="mt-8 space-y-8">
+            <section className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <h2 className="text-xl font-bold text-slate-900">Next Other Deck</h2>
 
-            <div className="space-y-4">
-                {parsedDeckTypes.map((deckType, index) => (
-                    <section
-                        key={deckType.id}
-                        className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+                    {saveStatus && (
+                        <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-900">
+                            {saveStatus}
+                        </div>
+                    )}
+
+                    <label className="mt-4 block text-sm font-semibold text-slate-700">
+                        Archetype
+                        <input
+                            value={archetype}
+                            onChange={(event) => setArchetype(event.target.value)}
+                            className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-emerald-700"
+                            placeholder="Drakloak Control"
+                        />
+                    </label>
+
+                    <label className="mt-4 block text-sm font-semibold text-slate-700">
+                        Criteria
+                        <textarea
+                            value={criteriaText}
+                            onChange={(event) => setCriteriaText(event.target.value)}
+                            className="mt-2 min-h-44 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm text-slate-900 outline-none focus:border-emerald-700"
+                            placeholder={"3 Dreepy\n3 Drakloak\n1 Elgyem"}
+                        />
+                    </label>
+
+                    <div className="mt-3 rounded-md bg-slate-50 p-3 text-sm text-slate-600">
+                        Parsed: {parsedCriteria.length > 0
+                            ? parsedCriteria
+                                  .map(
+                                      (criterion) =>
+                                          `${criterion.minQuantity} ${criterion.pokemonName}`
+                                  )
+                                  .join(", ")
+                            : "No valid criteria yet"}
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={saveDeckType}
+                        disabled={!nextCandidate}
+                        className="mt-4 rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                     >
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <h2 className="text-lg font-semibold text-slate-900">
-                                Rule {index + 1}
-                            </h2>
+                        Save
+                    </button>
+                </div>
 
-                            <button
-                                type="button"
-                                onClick={() => removeDeckType(deckType.id)}
-                                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-                            >
-                                Remove
-                            </button>
-                        </div>
+                <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    {isLoadingCandidates ? (
+                        <p className="text-sm text-slate-600">Loading Other decks...</p>
+                    ) : loadError ? (
+                        <p className="text-sm font-semibold text-red-700">{loadError}</p>
+                    ) : nextCandidate ? (
+                        <>
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-900">
+                                        Other deck to classify
+                                    </h2>
+                                    <p className="mt-1 text-sm text-slate-600">
+                                        {formatDate(nextCandidate.reportDate)} Ã‚- Daily rank #{nextCandidate.dailyRank}
+                                    </p>
+                                </div>
 
-                        <label className="mt-4 block text-sm font-semibold text-slate-700">
-                            Archetype
-                            <input
-                                value={deckType.archetype}
-                                onChange={(event) =>
-                                    updateDeckType(
-                                        deckType.id,
-                                        "archetype",
-                                        event.target.value
-                                    )
-                                }
-                                className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-emerald-700"
-                                placeholder="Drakloak Control"
-                            />
-                        </label>
+                                <div className="rounded-md bg-slate-50 px-3 py-2 text-right text-sm text-slate-700">
+                                    <div>{nextCandidate.standing} of {nextCandidate.players}</div>
+                                    <div>{nextCandidate.playerName}</div>
+                                </div>
+                            </div>
 
-                        <label className="mt-4 block text-sm font-semibold text-slate-700">
-                            Criteria
-                            <textarea
-                                value={deckType.criteriaText}
-                                onChange={(event) =>
-                                    updateDeckType(
-                                        deckType.id,
-                                        "criteriaText",
-                                        event.target.value
-                                    )
-                                }
-                                className="mt-2 min-h-32 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm text-slate-900 outline-none focus:border-emerald-700"
-                                placeholder={"3 Dreepy\n3 Drakloak\n1 Elgyem"}
-                            />
-                        </label>
+                            <p className="mt-4 text-sm font-semibold text-emerald-900">
+                                {nextCandidate.tournamentName}
+                            </p>
 
-                        <div className="mt-4 rounded-md bg-slate-50 p-3 text-sm text-slate-600">
-                            Parsed criteria:{" "}
-                            {deckType.criteria.length > 0
-                                ? deckType.criteria
-                                      .map(
-                                          (criterion) =>
-                                              `${criterion.minQuantity} ${criterion.pokemonName}`
-                                      )
-                                      .join(", ")
-                                : "No valid criteria yet"}
-                        </div>
-                    </section>
-                ))}
-            </div>
+                            <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+                                <div>
+                                    <h3 className="text-sm font-bold text-slate-700">Pokemon</h3>
+                                    <div className="mt-2 rounded-md bg-slate-50 p-3 font-mono text-sm text-slate-800">
+                                        {pokemonLines.length > 0 ? (
+                                            pokemonLines.map((line) => <div key={line}>{line}</div>)
+                                        ) : (
+                                            <span className="text-slate-500">No Pokemon section found.</span>
+                                        )}
+                                    </div>
+                                </div>
 
-            <div className="flex flex-wrap gap-3">
-                <button
-                    type="button"
-                    onClick={addDeckType}
-                    className="rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800"
-                >
-                    Add Rule
-                </button>
+                                <div>
+                                    <h3 className="text-sm font-bold text-slate-700">Full deck list</h3>
+                                    <pre className="mt-2 max-h-[32rem] overflow-auto rounded-md bg-slate-950 p-4 text-sm leading-6 text-slate-100">
+                                        {nextCandidate.decklistExport ?? "Decklist unavailable."}
+                                    </pre>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <p className="text-sm font-semibold text-emerald-900">
+                            No unclassified Other decks found in the latest {MAX_DATES_TO_SCAN} competition dates.
+                        </p>
+                    )}
+                </div>
+            </section>
 
-                <button
-                    type="button"
-                    className="rounded-lg border border-slate-300 px-5 py-3 font-semibold text-slate-700"
-                    disabled
-                >
-                    Save to Database
-                </button>
-            </div>
+            <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div className="border-b border-slate-200 p-5">
+                    <h2 className="text-xl font-bold text-slate-900">Saved Other Archetypes</h2>
+                </div>
 
-            <p className="text-sm text-slate-500">
-                Database save is disabled until the backend exposes an Other deck
-                types table endpoint.
-            </p>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full border-collapse text-left text-sm">
+                        <thead className="bg-slate-50 text-xs font-bold uppercase text-slate-600">
+                            <tr>
+                                <th className="px-4 py-3">Name</th>
+                                <th className="px-4 py-3">Criteria</th>
+                                <th className="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200">
+                            {deckTypes.map((deckType) => (
+                                <tr key={deckType.id}>
+                                    <td className="px-4 py-4 font-bold text-slate-900">
+                                        {deckType.archetype}
+                                    </td>
+                                    <td className="whitespace-pre-wrap px-4 py-4 font-mono text-slate-700">
+                                        {deckType.criteriaText}
+                                    </td>
+                                    <td className="px-4 py-4 text-right">
+                                        <button
+                                            type="button"
+                                            onClick={() => deleteDeckType(deckType.id)}
+                                            className="rounded-md border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     );
 }
