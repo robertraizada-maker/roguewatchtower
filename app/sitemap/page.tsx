@@ -52,6 +52,16 @@ export default async function SitemapPage() {
                         </Link>
                     </li>
                     <li>
+                        <Link className="font-medium text-emerald-800 hover:underline" href="/rogue-ranking">
+                            Rogue Ranking
+                        </Link>
+                    </li>
+                    <li>
+                        <Link className="font-medium text-emerald-800 hover:underline" href="/search">
+                            Search
+                        </Link>
+                    </li>
+                    <li>
                         <Link className="font-medium text-emerald-800 hover:underline" href="/about">
                             About
                         </Link>

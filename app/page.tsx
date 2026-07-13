@@ -2,51 +2,48 @@ import DecksOfTheDay from "@/components/DecksOfTheDay";
 import DateNavigator from "@/components/DateNavigator";
 import { getAvailableDates } from "@/lib/api";
 
+function EmptyDecksOfTheDay({ message }: { message: string }) {
+    return (
+        <div className="space-y-6">
+            <h1 className="text-4xl font-bold">
+                Rogue Decks of the Day
+            </h1>
+
+            <DateNavigator
+                selectedDate=""
+                availableDates={[]}
+            />
+
+            <p className="mt-4">
+                {message}
+            </p>
+        </div>
+    );
+}
+
 export default async function Home() {
+    let dates: string[] = [];
+    let loadError = false;
+
     try {
         const availableDates = await getAvailableDates();
-
-        if (availableDates.dates.length === 0) {
-            return (
-                <div className="space-y-6">
-                    <h1 className="text-4xl font-bold">
-                        Rogue Decks of the Day
-                    </h1>
-
-                    <DateNavigator
-                        selectedDate=""
-                        availableDates={[]}
-                    />
-
-                    <p className="mt-4">
-                        No tournament data available.
-                    </p>
-                </div>
-            );
-        }
-
-        return (
-            <DecksOfTheDay
-                date={availableDates.dates[0]}
-                availableDates={availableDates.dates}
-            />
-        );
+        dates = availableDates.dates;
     } catch {
-        return (
-            <div className="space-y-6">
-                <h1 className="text-4xl font-bold">
-                    Rogue Decks of the Day
-                </h1>
-
-                <DateNavigator
-                    selectedDate=""
-                    availableDates={[]}
-                />
-
-                <p className="mt-4">
-                    Unable to load tournament data right now.
-                </p>
-            </div>
-        );
+        loadError = true;
     }
+
+    if (loadError) {
+        return <EmptyDecksOfTheDay message="Unable to load tournament data right now." />;
+    }
+
+    if (dates.length === 0) {
+        return <EmptyDecksOfTheDay message="No tournament data available." />;
+    }
+
+    return (
+        <DecksOfTheDay
+            date={dates[0]}
+            availableDates={dates}
+        />
+    );
 }

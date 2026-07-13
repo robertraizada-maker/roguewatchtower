@@ -21,7 +21,7 @@ export default function AboutPage() {
                         dominated by established meta decks, remarkable players
                         continue to find success with innovative strategies.
                         Rogue Watchtower exists to celebrate those achievements
-                        and shine a spotlight on the game's most creative deck
+                        and shine a spotlight on the game&apos;s most creative deck
                         builders.
                     </p>
                 </div>
@@ -64,6 +64,32 @@ export default function AboutPage() {
                     </p>
                 </div>
 
+                <div
+                    style={{
+                        marginBottom: "24px",
+                    }}
+                >
+                    <h2 className="text-2xl font-bold">
+                        How Rogue Rating works
+                    </h2>
+
+                    <p className="mt-4 leading-7 text-slate-700">
+                        Rogue Rating measures how unusual a successful deck is.
+                        It looks at how often each archetype appeared in the
+                        previous 28 days, then assigns stars based on where that
+                        archetype sits after the top 50 meta decks have been
+                        filtered out.
+                    </p>
+
+                    <p className="mt-4 leading-7 text-slate-700">
+                        Archetypes ranked 51 to 60 by play count receive 1
+                        star, 61 to 70 receive 2 stars, 71 to 80 receive 3
+                        stars, 81 to 90 receive 4 stars, and anything ranked
+                        91st or lower receives 5 stars. A 5-star deck is the
+                        deepest rogue find: something barely represented in the
+                        recent metagame that still put up a notable result.
+                    </p>
+                </div>
                 <div
                     style={{
                         marginBottom: "24px",

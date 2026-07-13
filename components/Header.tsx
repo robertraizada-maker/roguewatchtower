@@ -1,28 +1,86 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+
+const navLinks = [
+    { href: "/", label: "Decks of the Day" },
+    { href: "/rogue-ranking", label: "Rogue Ranking" },
+    { href: "/search", label: "Search" },
+    { href: "/about", label: "About" },
+];
 
 export default function Header() {
-    return (
-        <header className="border-b bg-white">
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-                <Link href="/">
+    return (
+        <header className="border-b border-gray-200 bg-white text-gray-950">
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 md:py-4">
+                <Link
+                    href="/"
+                    className="shrink-0"
+                    onClick={() => setIsMenuOpen(false)}
+                >
                     <Image
                         src="/images/logo.png"
                         alt="RogueWatchtower"
                         width={250}
                         height={125}
+                        className="h-auto w-44 sm:w-52 md:w-56"
                         priority
                         unoptimized
                     />
                 </Link>
 
-                <nav className="flex gap-8 text-lg font-medium">
-                    <Link className="text-emerald-800 hover:underline" href="/">Decks of the Day</Link>
-                    <Link className="text-emerald-800 hover:underline" href="/about">About</Link>
-                </nav>
+                <button
+                    type="button"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-gray-300 bg-white text-emerald-900 shadow-sm md:hidden"
+                    aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={isMenuOpen}
+                    aria-controls="site-menu"
+                    onClick={() => setIsMenuOpen((open) => !open)}
+                >
+                    <span className="sr-only">
+                        {isMenuOpen ? "Close menu" : "Open menu"}
+                    </span>
+                    <span className="flex h-5 w-5 flex-col justify-center gap-1.5">
+                        <span className={`block h-0.5 w-5 rounded bg-current transition ${isMenuOpen ? "translate-y-2 rotate-45" : ""}`} />
+                        <span className={`block h-0.5 w-5 rounded bg-current transition ${isMenuOpen ? "opacity-0" : ""}`} />
+                        <span className={`block h-0.5 w-5 rounded bg-current transition ${isMenuOpen ? "-translate-y-2 -rotate-45" : ""}`} />
+                    </span>
+                </button>
 
+                <nav className="hidden gap-8 text-lg font-medium md:flex">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            className="text-emerald-800 hover:underline"
+                            href={link.href}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
             </div>
+
+            <nav
+                id="site-menu"
+                className={`${isMenuOpen ? "block" : "hidden"} border-t border-gray-200 bg-white px-4 py-3 shadow-sm md:hidden`}
+            >
+                <div className="mx-auto flex max-w-7xl flex-col">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            className="rounded-md px-3 py-3 text-lg font-semibold text-emerald-900 hover:bg-emerald-50"
+                            href={link.href}
+                            onClick={() => setIsMenuOpen(false)}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                </div>
+            </nav>
         </header>
     );
 }

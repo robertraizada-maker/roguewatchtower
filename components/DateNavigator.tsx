@@ -48,7 +48,7 @@ export default function DateNavigator({
                 type="button"
                 disabled={!previousDate}
                 onClick={() => navigateToDate(previousDate)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
                 Previous
             </button>
@@ -57,7 +57,7 @@ export default function DateNavigator({
                 value={effectiveSelectedDate}
                 onChange={(e) => navigateToDate(e.target.value)}
                 aria-label="Select date"
-                className="min-w-[260px] rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium"
+                className="min-w-[260px] rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-950"
             >
                 {availableDates.map((date) => (
                     <option key={date} value={date}>
@@ -70,7 +70,7 @@ export default function DateNavigator({
                 type="button"
                 disabled={!nextDate}
                 onClick={() => navigateToDate(nextDate)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
                 Next
             </button>
