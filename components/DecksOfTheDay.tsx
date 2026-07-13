@@ -41,6 +41,7 @@ export default async function DecksOfTheDay({ date, availableDates }: Props) {
                             deck.archetype_icons
                         }
                         player={deck.player_name}
+                        tournamentId={deck.tournament_id}
                         tournament={deck.tournament_name}
                         standing={deck.standing}
                         players={deck.tournament_players}
@@ -52,3 +53,4 @@ export default async function DecksOfTheDay({ date, availableDates }: Props) {
         </div>
     );
 }
+

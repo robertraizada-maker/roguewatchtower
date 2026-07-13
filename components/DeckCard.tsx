@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { useState } from "react";
 
 import { getDeckDisplayName } from "@/lib/deck-display";
+import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
 
 interface DeckCardProps {
     rank: number;
@@ -11,6 +12,7 @@ interface DeckCardProps {
     archetype: string;
     archetypeIcons?: string[];
     player: string;
+    tournamentId?: number;
     tournament: string;
     standing: number;
     players: number;
@@ -86,6 +88,7 @@ export default function DeckCard({
     archetype,
     archetypeIcons,
     player,
+    tournamentId,
     tournament,
     standing,
     players,
@@ -95,6 +98,7 @@ export default function DeckCard({
     const finishPercent = ((standing / players) * 100).toFixed(1);
     const isOutlawAward = rank === 1 && standing === 1 && players >= 32;
     const displayArchetype = getDeckDisplayName(archetype, decklistExport);
+    const tournamentUrl = getLimitlessTournamentDetailsUrl(tournamentId);
     const iconUrls =
         archetypeIcons && archetypeIcons.length > 0
             ? archetypeIcons
@@ -126,6 +130,7 @@ export default function DeckCard({
             JSON.stringify({
                 archetype: displayArchetype,
                 player,
+    tournamentId,
                 tournament,
                 decklist: decklistExport,
             })
@@ -225,7 +230,20 @@ export default function DeckCard({
 
                         <p>Top {finishPercent}%</p>
 
-                        <p>{tournament}</p>
+                        <p>
+                            {tournamentUrl ? (
+                                <a
+                                    href={tournamentUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-semibold text-emerald-800 hover:underline"
+                                >
+                                    {tournament}
+                                </a>
+                            ) : (
+                                tournament
+                            )}
+                        </p>
                     </div>
                 </div>
 
@@ -276,3 +294,4 @@ export default function DeckCard({
         </article>
     );
 }
+

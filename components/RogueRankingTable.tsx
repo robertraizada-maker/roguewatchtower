@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { getDeckDisplayName } from "@/lib/deck-display";
+import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
 import { getDeckAnchorId } from "@/lib/rogue-rating";
 import type { RankingDeck } from "@/lib/rogue-ranking";
 import {
@@ -166,7 +167,18 @@ export default function RogueRankingTable({ decks, selectedRange }: Props) {
                                     {deck.player_name}
                                 </td>
                                 <td className="px-4 py-4 text-slate-700">
-                                    {deck.tournament_name}
+                                    {getLimitlessTournamentDetailsUrl(deck.tournament_id) ? (
+                                        <a
+                                            href={getLimitlessTournamentDetailsUrl(deck.tournament_id) ?? undefined}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="font-semibold text-emerald-800 hover:underline"
+                                        >
+                                            {deck.tournament_name}
+                                        </a>
+                                    ) : (
+                                        deck.tournament_name
+                                    )}
                                 </td>
                                 <td className="whitespace-nowrap px-4 py-4 text-slate-700">
                                     <Link
@@ -184,3 +196,4 @@ export default function RogueRankingTable({ decks, selectedRange }: Props) {
         </div>
     );
 }
+
