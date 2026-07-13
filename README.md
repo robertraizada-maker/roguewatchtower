@@ -15,6 +15,24 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Admin Authentication
+
+The `/admin` pages are protected by a Cloudflare Pages Function using HTTP Basic Auth.
+
+Set this secret in Cloudflare Pages:
+
+```text
+ADMIN_PASSWORD
+```
+
+The default username is:
+
+```text
+robert.raizada
+```
+
+You can override the username with an optional `ADMIN_USERNAME` environment variable.
+Do not store the admin password in this repository or any `.env` file.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
