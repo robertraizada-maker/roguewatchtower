@@ -102,7 +102,7 @@ export default function RogueRankingTable({ decks, selectedRange }: Props) {
                         onChange={(event) => setSortOption(event.target.value as SortOption)}
                         className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900"
                     >
-                        <option value="rogue-ranking">Rogue Ranking</option>
+                        <option value="rogue-ranking">Rogue Rating</option>
                         <option value="finish-percentage">Finish Percentage</option>
                     </select>
                 </label>
