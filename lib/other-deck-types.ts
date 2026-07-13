@@ -8,6 +8,8 @@ export interface OtherDeckType {
     criteria: OtherDeckTypeCriterion[];
 }
 
+export const OTHER_DECK_TYPES_STORAGE_KEY = "roguewatchtower:other-deck-types";
+
 export const defaultOtherDeckTypes: OtherDeckType[] = [
     {
         archetype: "Drakloak Control",
@@ -30,6 +32,20 @@ export const defaultOtherDeckTypes: OtherDeckType[] = [
         criteria: [
             { minQuantity: 3, pokemonName: "Crabominable" },
             { minQuantity: 2, pokemonName: "Dudunsparce" },
+        ],
+    },
+    {
+        archetype: "Luxray Dudunsparce",
+        criteria: [
+            { minQuantity: 2, pokemonName: "Luxray ex" },
+            { minQuantity: 2, pokemonName: "Dudunsparce" },
+        ],
+    },
+    {
+        archetype: "Arboliva Crobat",
+        criteria: [
+            { minQuantity: 2, pokemonName: "Team Rocket's Crobat" },
+            { minQuantity: 2, pokemonName: "Arboliva ex" },
         ],
     },
 ];

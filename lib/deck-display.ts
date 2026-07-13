@@ -2,6 +2,7 @@ import {
     findMatchingFeaturedOtherDeckType,
     findMatchingOtherDeckType,
     normalisePokemonName,
+    type OtherDeckType,
 } from "@/lib/other-deck-types";
 
 interface PokemonCardLine {
@@ -116,12 +117,19 @@ function getPokemonCounts(decklistExport: string | null) {
     return counts;
 }
 
-export function getDeckDisplayName(deckName: string, decklistExport: string | null) {
+export function getDeckDisplayName(
+    deckName: string,
+    decklistExport: string | null,
+    otherDeckTypes?: OtherDeckType[]
+) {
     if (deckName !== "Other") {
         return deckName;
     }
 
-    const matchingDeckType = findMatchingOtherDeckType(getPokemonCounts(decklistExport));
+    const matchingDeckType = findMatchingOtherDeckType(
+        getPokemonCounts(decklistExport),
+        otherDeckTypes
+    );
 
     if (matchingDeckType) {
         return matchingDeckType.archetype;

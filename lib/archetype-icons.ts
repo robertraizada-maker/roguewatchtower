@@ -3,6 +3,9 @@ const ICON_BASE_URL = "https://r2.limitlesstcg.net/pokemon/gen9";
 const ARCHETYPE_ICON_SLUGS: Record<string, string[]> = {
     "Blissey": ["blissey"],
     "Crustle": ["crustle"],
+    "Arboliva Crobat": ["arboliva", "crobat"],
+    "Drakloak Control": ["drakloak"],
+    "Luxray Dudunsparce": ["luxray", "dudunsparce"],
     "Dragapult Blaziken": ["dragapult", "blaziken"],
     "Dragapult Iron Thorns": ["dragapult", "iron-thorns"],
     "Erika's Victreebel": ["victreebel"],

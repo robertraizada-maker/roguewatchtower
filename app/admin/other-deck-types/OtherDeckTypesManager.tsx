@@ -6,6 +6,7 @@ import {
     findMatchingOtherDeckType,
     formatOtherDeckTypeCriteria,
     normalisePokemonName,
+    OTHER_DECK_TYPES_STORAGE_KEY,
     parseOtherDeckTypeCriteria,
     type OtherDeckType,
 } from "@/lib/other-deck-types";
@@ -33,7 +34,6 @@ interface PokemonCardLine {
     name: string;
 }
 
-const STORAGE_KEY = "roguewatchtower:other-deck-types";
 const MAX_DATES_TO_SCAN = 28;
 
 const initialDeckTypes: EditableOtherDeckType[] = defaultOtherDeckTypes.map(
@@ -150,7 +150,7 @@ function loadStoredDeckTypes() {
         return initialDeckTypes;
     }
 
-    const storedValue = window.localStorage.getItem(STORAGE_KEY);
+    const storedValue = window.localStorage.getItem(OTHER_DECK_TYPES_STORAGE_KEY);
 
     if (!storedValue) {
         return initialDeckTypes;
@@ -180,7 +180,7 @@ export default function OtherDeckTypesManager() {
 
 
     useEffect(() => {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(deckTypes));
+        window.localStorage.setItem(OTHER_DECK_TYPES_STORAGE_KEY, JSON.stringify(deckTypes));
     }, [deckTypes]);
 
     useEffect(() => {
