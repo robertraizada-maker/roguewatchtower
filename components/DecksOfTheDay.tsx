@@ -19,7 +19,7 @@ export default async function DecksOfTheDay({ date, availableDates }: Props) {
                 </h1>
 
                 <p className="mt-3 text-slate-600">
-                    Rogue Watchtower tracks the best Pokémon TCG rogue decks from tournaments around the world every day. Discover the highest-performing rogue decks, Rogue Rankings and Decks of the Day.
+                    Discover the best Pokémon TCG rogue decks from tournaments worldwide.
                 </p>
             </div>
 

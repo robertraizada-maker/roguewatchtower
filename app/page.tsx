@@ -8,7 +8,7 @@ export const metadata: Metadata = {
         absolute: "Pokémon TCG Rogue Decks | Daily Rogue Deck Rankings | Rogue Watchtower",
     },
     description:
-        "Rogue Watchtower tracks the best Pokémon TCG rogue decks from tournaments around the world every day.",
+        "Discover the best Pokémon TCG rogue decks from tournaments worldwide.",
 };
 
 function EmptyDecksOfTheDay({ message }: { message: string }) {
@@ -19,7 +19,7 @@ function EmptyDecksOfTheDay({ message }: { message: string }) {
             </h1>
 
             <p className="mt-3 text-slate-600">
-                Rogue Watchtower tracks the best Pokémon TCG rogue decks from tournaments around the world every day. Discover the highest-performing rogue decks, Rogue Rankings and Decks of the Day.
+                Discover the best Pokémon TCG rogue decks from tournaments worldwide.
             </p>
 
             <DateNavigator

@@ -23,8 +23,9 @@ export default function Header() {
                     onClick={() => setIsMenuOpen(false)}
                 >
                     <Image
-                        src="/images/logo.png"
-                        alt="RogueWatchtower"
+                        src="/images/pokemon-tcg-rogue-decks-rogue-watchtower.png"
+                        alt="Pokémon TCG Rogue Decks - Rogue Watchtower"
+                        title="Pokémon TCG Rogue Decks - Rogue Watchtower"
                         width={250}
                         height={125}
                         className="h-auto w-44 sm:w-52 md:w-56"
