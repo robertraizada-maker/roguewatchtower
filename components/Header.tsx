@@ -6,7 +6,7 @@ import { useState } from "react";
 
 const navLinks = [
     { href: "/", label: "Decks of the Day" },
-    { href: "/rogue-pokemon-tcg-decks", label: "All decks" },
+    { href: "/rogue-pokemon-tcg-decks", label: "All Decks" },
     { href: "/rogue-ranking", label: "Rogue Ranking" },
     { href: "/search", label: "Search" },
     { href: "/about", label: "About" },

@@ -15,9 +15,6 @@ export function getArchetypeSlug(name: string) {
     return slugifyPokemonName(name);
 }
 
-function getDeckIconUrls(deck: RankingDeck) {
-    return deck.deck_icons || deck.icon_urls || deck.archetype_icons;
-}
 
 export async function getArchetypes(): Promise<ArchetypeSummary[]> {
     const decks = await getRankingDecks();
@@ -54,7 +51,7 @@ export async function getArchetypes(): Promise<ArchetypeSummary[]> {
                 slug: getArchetypeSlug(name),
                 rogueRating: bestDeck?.rogueRating ?? 0,
                 deckCount: sortedDecks.length,
-                iconUrls: getArchetypeIconUrls(name, bestDeck ? getDeckIconUrls(bestDeck) : undefined),
+                iconUrls: getArchetypeIconUrls(name),
                 decks: sortedDecks,
             };
         })
