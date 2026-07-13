@@ -54,6 +54,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: "weekly",
             priority: 0.4,
         },
+        {
+            url: absoluteUrl("/privacy-policy"),
+            lastModified: now,
+            changeFrequency: "yearly",
+            priority: 0.3,
+        },
         ...accurateDates.map((date) => ({
             url: absoluteUrl(`/decks-of-the-day/${date}`),
             lastModified: new Date(date + "T00:00:00Z"),

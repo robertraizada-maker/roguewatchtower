@@ -66,6 +66,11 @@ export default async function SitemapPage() {
                             About
                         </Link>
                     </li>
+                    <li>
+                        <Link className="font-medium text-emerald-800 hover:underline" href="/privacy-policy">
+                            Privacy Policy
+                        </Link>
+                    </li>
                 </ul>
             </section>
 
