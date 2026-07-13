@@ -10,8 +10,13 @@ function unauthorized() {
     });
 }
 
-function unavailable() {
-    return new Response("Admin authentication is not configured.", {
+function unavailable(env) {
+    const visibleKeys = Object.keys(env || {})
+        .filter((key) => !key.toLowerCase().includes("password"))
+        .sort()
+        .join(", ") || "none";
+
+    return new Response(`Admin authentication is not configured. Visible env keys: ${visibleKeys}`, {
         status: 503,
         headers: {
             "Cache-Control": "no-store",
@@ -63,7 +68,7 @@ export async function onRequest(context) {
     const expectedPassword = context.env.ADMIN_PASSWORD;
 
     if (!expectedPassword) {
-        return unavailable();
+        return unavailable(context.env);
     }
 
     const credentials = parseBasicAuth(context.request);
