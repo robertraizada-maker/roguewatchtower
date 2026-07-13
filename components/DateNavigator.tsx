@@ -39,25 +39,26 @@ export default function DateNavigator({
 
     return (
         <div
-            className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-center"
+            className="grid grid-cols-[1fr_2fr_1fr] rounded-xl border border-slate-200 bg-white p-3 sm:mx-auto sm:max-w-xl"
             style={{
-                gap: "12px",
+                gap: "8px",
             }}
         >
             <button
                 type="button"
+                aria-label="Previous date"
                 disabled={!previousDate}
                 onClick={() => navigateToDate(previousDate)}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-10 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl font-semibold leading-none text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
-                Previous
+                <span aria-hidden="true">‹</span>
             </button>
 
             <select
                 value={effectiveSelectedDate}
                 onChange={(e) => navigateToDate(e.target.value)}
                 aria-label="Select date"
-                className="min-w-[260px] rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-950"
+                className="h-10 min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-950"
             >
                 {availableDates.map((date) => (
                     <option key={date} value={date}>
@@ -68,13 +69,13 @@ export default function DateNavigator({
 
             <button
                 type="button"
+                aria-label="Next date"
                 disabled={!nextDate}
                 onClick={() => navigateToDate(nextDate)}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-10 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl font-semibold leading-none text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
-                Next
+                <span aria-hidden="true">›</span>
             </button>
         </div>
     );
 }
-
