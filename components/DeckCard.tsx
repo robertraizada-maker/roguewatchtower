@@ -21,6 +21,9 @@ interface DeckCardProps {
     decklistExport: string | null;
     reportDate?: string;
     showRogueRating?: boolean;
+    showRankLabel?: boolean;
+    showOutlawAward?: boolean;
+    highlightTopDeck?: boolean;
 }
 
 function getRankLabel(rank: number) {
@@ -71,9 +74,13 @@ export default function DeckCard({
     decklistExport,
     reportDate,
     showRogueRating = true,
+    showRankLabel = true,
+    showOutlawAward = true,
+    highlightTopDeck = true,
 }: DeckCardProps) {
     const finishPercent = ((standing / players) * 100).toFixed(1);
-    const isOutlawAward = rank === 1 && standing === 1 && players >= 32;
+    const isTopDeckHighlight = highlightTopDeck && rank === 1;
+    const isOutlawAward = showOutlawAward && rank === 1 && standing === 1 && players >= 32;
     const displayArchetype = getDeckDisplayName(archetype, decklistExport);
     const tournamentUrl = getLimitlessTournamentDetailsUrl(tournamentId);
     const iconUrls =
@@ -118,16 +125,18 @@ export default function DeckCard({
         <article
             id={anchorId}
             className={`rounded-xl border p-6 shadow-sm ${
-                rank === 1
+                isTopDeckHighlight
                     ? "border-amber-300 bg-amber-50"
                     : "border-slate-200 bg-white"
             }`}
         >
             <div className="grid gap-6 md:grid-cols-2">
                 <div className="min-w-0">
-                    <div className="text-lg font-semibold text-slate-700">
-                        {getRankLabel(rank)}
-                    </div>
+                    {showRankLabel && (
+                        <div className="text-lg font-semibold text-slate-700">
+                            {getRankLabel(rank)}
+                        </div>
+                    )}
 
                     {isOutlawAward && (
                         <div

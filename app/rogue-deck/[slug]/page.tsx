@@ -90,6 +90,9 @@ export default async function RogueDeckPage({ params }: Props) {
                         decklistExport={deck.decklist_export}
                         reportDate={deck.reportDate}
                         showRogueRating={false}
+                        showRankLabel={false}
+                        showOutlawAward={false}
+                        highlightTopDeck={false}
                     />
                 ))}
             </div>
