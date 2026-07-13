@@ -1,5 +1,6 @@
 export interface RogueDeck {
     tournament_id?: number;
+    tournament_limitless_id?: string;
     player_id?: number;
     deck_name: string;
     deck_icons?: string[];
@@ -31,3 +32,4 @@ export interface AvailableDatesResponse {
     success: boolean;
     dates: string[];
 }
+

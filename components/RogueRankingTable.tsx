@@ -167,9 +167,9 @@ export default function RogueRankingTable({ decks, selectedRange }: Props) {
                                     {deck.player_name}
                                 </td>
                                 <td className="px-4 py-4 text-slate-700">
-                                    {getLimitlessTournamentDetailsUrl(deck.tournament_id) ? (
+                                    {getLimitlessTournamentDetailsUrl(deck.tournament_limitless_id ?? deck.tournament_id) ? (
                                         <a
-                                            href={getLimitlessTournamentDetailsUrl(deck.tournament_id) ?? undefined}
+                                            href={getLimitlessTournamentDetailsUrl(deck.tournament_limitless_id ?? deck.tournament_id) ?? undefined}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="font-semibold text-emerald-800 hover:underline"

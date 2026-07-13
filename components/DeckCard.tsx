@@ -12,7 +12,7 @@ interface DeckCardProps {
     archetype: string;
     archetypeIcons?: string[];
     player: string;
-    tournamentId?: number;
+    tournamentId?: string | number;
     tournament: string;
     standing: number;
     players: number;

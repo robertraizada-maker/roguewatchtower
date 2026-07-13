@@ -1,4 +1,4 @@
-export function getLimitlessTournamentDetailsUrl(tournamentId?: number) {
+export function getLimitlessTournamentDetailsUrl(tournamentId?: string | number) {
     if (!tournamentId) {
         return null;
     }
