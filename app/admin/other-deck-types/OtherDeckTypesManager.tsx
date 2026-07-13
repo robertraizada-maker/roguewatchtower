@@ -45,17 +45,24 @@ const initialDeckTypes: EditableOtherDeckType[] = defaultOtherDeckTypes.map(
 );
 
 function parsePokemonCardLine(line: string): PokemonCardLine | null {
-    const match = /^(\d+)\s+(.+)\s+[A-Z0-9]{2,8}\s+[A-Z]*\d+[a-z]?$/i.exec(
-        line.trim()
-    );
+    const match = /^(\d+)\s+(.+)$/.exec(line.trim());
 
     if (!match) {
         return null;
     }
 
+    const cardText = match[2].trim();
+    const cardParts = cardText.split(/\s+/);
+    const maybeSetCode = cardParts.at(-2) ?? "";
+    const maybeCardNumber = cardParts.at(-1) ?? "";
+    const hasSetAndNumber =
+        cardParts.length >= 3 &&
+        /^[A-Z0-9]{2,8}$/i.test(maybeSetCode) &&
+        /^[A-Z]*\d+[a-z]?(?:\/\d+)?$/i.test(maybeCardNumber);
+
     return {
         quantity: Number(match[1]),
-        name: match[2].trim(),
+        name: hasSetAndNumber ? cardParts.slice(0, -2).join(" ") : cardText,
     };
 }
 
@@ -267,17 +274,19 @@ export default function OtherDeckTypesManager() {
         [deckTypes]
     );
 
-    const nextCandidate = useMemo(
+    const unclassifiedCandidates = useMemo(
         () =>
-            candidates.find(
+            candidates.filter(
                 (candidate) =>
                     !findMatchingOtherDeckType(
                         getPokemonCounts(candidate.decklistExport),
                         validDeckTypes
                     )
-            ) ?? null,
+            ),
         [candidates, validDeckTypes]
     );
+
+    const nextCandidate = unclassifiedCandidates[0] ?? null;
 
     const parsedCriteria = useMemo(
         () => parseOtherDeckTypeCriteria(criteriaText),
@@ -311,7 +320,7 @@ export default function OtherDeckTypesManager() {
         ]);
         setArchetype("");
         setCriteriaText("");
-        setSaveStatus("Saved");
+        setSaveStatus("Saved. Matching decks have been removed from the queue.");
     }
 
     function deleteDeckType(id: string) {
@@ -331,6 +340,12 @@ export default function OtherDeckTypesManager() {
                         <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-900">
                             {saveStatus}
                         </div>
+                    )}
+
+                    {!isLoadingCandidates && (
+                        <p className="mt-4 text-sm text-slate-600">
+                            {unclassifiedCandidates.length} Other decks left to review.
+                        </p>
                     )}
 
                     <label className="mt-4 block text-sm font-semibold text-slate-700">
