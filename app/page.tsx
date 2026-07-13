@@ -13,12 +13,12 @@ export const metadata: Metadata = {
 
 function EmptyDecksOfTheDay({ message }: { message: string }) {
     return (
-        <div className="space-y-6">
-            <h1 className="text-4xl font-bold">
+        <div className="space-y-4 sm:space-y-6">
+            <h1 className="text-3xl font-bold sm:text-4xl">
                 Pokémon TCG Rogue Decks
             </h1>
 
-            <p className="mt-3 text-slate-600">
+            <p className="mt-2 text-slate-600 sm:mt-3">
                 Discover the best Pokémon TCG rogue decks from tournaments worldwide.
             </p>
 
@@ -27,7 +27,7 @@ function EmptyDecksOfTheDay({ message }: { message: string }) {
                 availableDates={[]}
             />
 
-            <p className="mt-4">
+            <p className="mt-3 sm:mt-4">
                 {message}
             </p>
         </div>

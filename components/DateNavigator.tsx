@@ -46,7 +46,7 @@ export default function DateNavigator({
 
     return (
         <div
-            className="grid grid-cols-[1fr_2fr_1fr] rounded-xl border border-slate-200 bg-white p-3 sm:mx-auto sm:max-w-xl"
+            className="grid grid-cols-[1fr_2fr_1fr] rounded-xl border border-slate-200 bg-white p-2 sm:mx-auto sm:max-w-xl"
             style={{
                 gap: "8px",
             }}
@@ -56,7 +56,7 @@ export default function DateNavigator({
                 aria-label="Previous date"
                 disabled={!previousDate}
                 onClick={() => navigateToDate(previousDate)}
-                className="flex h-10 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl font-semibold leading-none text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl font-semibold leading-none text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
                 <span aria-hidden="true">‹</span>
             </button>
@@ -65,7 +65,7 @@ export default function DateNavigator({
                 value={effectiveSelectedDate}
                 onChange={(e) => navigateToDate(e.target.value)}
                 aria-label="Select date"
-                className="h-10 min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-950"
+                className="h-9 min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-950"
             >
                 {availableDates.map((date) => (
                     <option key={date} value={date}>
@@ -79,7 +79,7 @@ export default function DateNavigator({
                 aria-label="Next date"
                 disabled={!nextDate}
                 onClick={() => navigateToDate(nextDate)}
-                className="flex h-10 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl font-semibold leading-none text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-xl font-semibold leading-none text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
             >
                 <span aria-hidden="true">›</span>
             </button>

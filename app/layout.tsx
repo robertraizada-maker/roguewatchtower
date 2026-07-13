@@ -28,7 +28,7 @@ export default function RootLayout({
             <body className="bg-gray-50 text-gray-900">
                 <Header />
 
-                <main className="mx-auto max-w-7xl px-6 py-8">
+                <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
                     {children}
                 </main>
 

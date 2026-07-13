@@ -12,13 +12,13 @@ export default async function DecksOfTheDay({ date, availableDates }: Props) {
     const result = await getRogueDecks(date);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             <div>
-                <h1 className="text-4xl font-bold">
+                <h1 className="text-3xl font-bold sm:text-4xl">
                     Pokémon TCG Rogue Decks
                 </h1>
 
-                <p className="mt-3 text-slate-600">
+                <p className="mt-2 text-slate-600 sm:mt-3">
                     Discover the best Pokémon TCG rogue decks from tournaments worldwide.
                 </p>
             </div>
@@ -28,7 +28,7 @@ export default async function DecksOfTheDay({ date, availableDates }: Props) {
                 availableDates={availableDates}
             />
 
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5">
                 {result.rogueDecks.map((deck, index) => (
                     <DeckCard
                         key={index}

@@ -16,7 +16,7 @@ export default function Header() {
 
     return (
         <header className="border-b border-gray-200 bg-white text-gray-950">
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 md:py-4">
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 md:py-4">
                 <Link
                     href="/"
                     className="shrink-0"
@@ -28,7 +28,7 @@ export default function Header() {
                         title="Pokémon TCG Rogue Decks - Rogue Watchtower"
                         width={250}
                         height={125}
-                        className="h-auto w-44 sm:w-52 md:w-56"
+                        className="h-auto w-32 sm:w-52 md:w-56"
                         priority
                         unoptimized
                     />
@@ -36,7 +36,7 @@ export default function Header() {
 
                 <button
                     type="button"
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-gray-300 bg-white text-emerald-900 shadow-sm md:hidden"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-300 bg-white text-emerald-900 shadow-sm md:hidden"
                     aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                     aria-expanded={isMenuOpen}
                     aria-controls="site-menu"
@@ -67,13 +67,13 @@ export default function Header() {
 
             <nav
                 id="site-menu"
-                className={`${isMenuOpen ? "block" : "hidden"} border-t border-gray-200 bg-white px-4 py-3 shadow-sm md:hidden`}
+                className={`${isMenuOpen ? "block" : "hidden"} border-t border-gray-200 bg-white px-4 py-2 shadow-sm md:hidden`}
             >
                 <div className="mx-auto flex max-w-7xl flex-col">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
-                            className="rounded-md px-3 py-3 text-lg font-semibold text-emerald-900 hover:bg-emerald-50"
+                            className="rounded-md px-3 py-2 text-base font-semibold text-emerald-900 hover:bg-emerald-50"
                             href={link.href}
                             onClick={() => setIsMenuOpen(false)}
                         >
