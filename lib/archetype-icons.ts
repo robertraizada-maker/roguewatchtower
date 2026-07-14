@@ -11,6 +11,8 @@ const ARCHETYPE_ICON_SLUGS: Record<string, string[]> = {
     "Erika's Victreebel": ["victreebel"],
     "Heatran Metang": ["heatran", "metang"],
     "Iron Thorns": ["iron-thorns"],
+    "Joltik Box": ["joltik"],
+    "Mega Charizard X": ["charizard-mega-x"],
     "Mega Audino": ["audino"],
     "Mega Camerupt": ["camerupt-mega"],
     "Mega Manectric": ["manectric-mega"],
