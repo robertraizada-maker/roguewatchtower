@@ -2,25 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo } from "react";
 
 import { getArchetypeIconUrls, slugifyPokemonName } from "@/lib/archetype-icons";
 import { getDeckDisplayName } from "@/lib/deck-display";
-import {
-    defaultOtherDeckTypes,
-    OTHER_DECK_TYPES_STORAGE_KEY,
-    parseOtherDeckTypeCriteria,
-    type OtherDeckType,
-} from "@/lib/other-deck-types";
+
 import type { RankingDeck } from "@/lib/rogue-ranking";
 
 interface Props {
     decks: RankingDeck[];
-}
-
-interface StoredOtherDeckType {
-    archetype: string;
-    criteriaText: string;
 }
 
 interface ArchetypeSummary {
@@ -35,54 +25,11 @@ function getDeckCountLabel(count: number) {
     return count === 1 ? "1 deck" : `${count} decks`;
 }
 
-function parseStoredOtherDeckTypes(storedValue: string | null) {
-    if (!storedValue) {
-        return undefined;
-    }
-
-    try {
-        const storedDeckTypes = JSON.parse(storedValue) as StoredOtherDeckType[];
-
-        if (!Array.isArray(storedDeckTypes)) {
-            return undefined;
-        }
-
-        const otherDeckTypes = storedDeckTypes
-            .map((deckType): OtherDeckType | null => {
-                const archetype = deckType.archetype?.trim();
-                const criteria = parseOtherDeckTypeCriteria(deckType.criteriaText ?? "");
-
-                if (!archetype || criteria.length === 0) {
-                    return null;
-                }
-
-                return {
-                    archetype,
-                    criteria,
-                };
-            })
-            .filter((deckType): deckType is OtherDeckType => deckType !== null);
-
-        return otherDeckTypes.length > 0
-            ? [...defaultOtherDeckTypes, ...otherDeckTypes]
-            : undefined;
-    } catch {
-        return undefined;
-    }
-}
-
-function getArchetypes(
-    decks: RankingDeck[],
-    otherDeckTypes?: OtherDeckType[]
-): ArchetypeSummary[] {
+function getArchetypes(decks: RankingDeck[]): ArchetypeSummary[] {
     const grouped = new Map<string, RankingDeck[]>();
 
     decks.forEach((deck) => {
-        const name = getDeckDisplayName(
-            deck.deck_name,
-            deck.decklist_export,
-            otherDeckTypes
-        );
+        const name = getDeckDisplayName(deck.deck_name, deck.decklist_export);
         grouped.set(name, [...(grouped.get(name) || []), deck]);
     });
 
@@ -117,30 +64,10 @@ function getArchetypes(
         });
 }
 
-function subscribeToStoredOtherDeckTypes(onStoreChange: () => void) {
-    window.addEventListener("storage", onStoreChange);
-
-    return () => window.removeEventListener("storage", onStoreChange);
-}
-
-function getStoredOtherDeckTypesSnapshot() {
-    return window.localStorage.getItem(OTHER_DECK_TYPES_STORAGE_KEY);
-}
-
 export default function AllDecksClient({ decks }: Props) {
-    const storedOtherDeckTypesSnapshot = useSyncExternalStore(
-        subscribeToStoredOtherDeckTypes,
-        getStoredOtherDeckTypesSnapshot,
-        () => null
-    );
-    const storedOtherDeckTypes = useMemo(
-        () => parseStoredOtherDeckTypes(storedOtherDeckTypesSnapshot),
-        [storedOtherDeckTypesSnapshot]
-    );
-
     const archetypes = useMemo(
-        () => getArchetypes(decks, storedOtherDeckTypes),
-        [decks, storedOtherDeckTypes]
+        () => getArchetypes(decks),
+        [decks]
     );
     const ratingGroups = [5, 4, 3, 2, 1]
         .map((rating) => ({
