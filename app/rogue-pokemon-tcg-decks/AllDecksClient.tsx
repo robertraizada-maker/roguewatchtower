@@ -156,7 +156,13 @@ export default function AllDecksClient({ decks }: Props) {
             {ratingGroups.map((group) => (
                 <section key={group.rating} className="space-y-3">
                     <h2 className="text-2xl font-bold text-slate-900">
-                        Rogue Rating {"\u2605".repeat(group.rating)}
+                        <Link
+                            href="/rogue-rating"
+                            title="Learn how Rogue Rating works"
+                            className="cursor-pointer text-slate-900 hover:text-emerald-800 hover:underline focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:ring-offset-2"
+                        >
+                            Rogue Rating {"\u2605".repeat(group.rating)}
+                        </Link>
                     </h2>
 
                     <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

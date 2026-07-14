@@ -8,6 +8,7 @@ const navLinks = [
     { href: "/", label: "Decks of the Day" },
     { href: "/rogue-pokemon-tcg-decks", label: "All Decks" },
     { href: "/rogue-ranking", label: "Rogue Ranking" },
+    { href: "/rogue-rating", label: "Rogue Rating" },
 ];
 
 function SearchIcon() {

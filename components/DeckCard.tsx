@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 import { getArchetypeIconUrls } from "@/lib/archetype-icons";
@@ -191,19 +192,25 @@ export default function DeckCard({
                     </div>
 
                     {showRogueRating && (
-                        <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-emerald-800 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-950">
+                        <Link
+                            href="/rogue-rating"
+                            aria-label={`Rogue Rating: ${rogueRating} out of 5 stars. Learn how Rogue Rating works.`}
+                            title="Learn how Rogue Rating works"
+                            className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-md border border-emerald-800 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-950 transition hover:border-emerald-950 hover:bg-emerald-100 hover:underline focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:ring-offset-2"
+                        >
                             <span>Rogue Rating</span>
 
-                            <span
-                                aria-label={`${rogueRating} out of 5 stars`}
-                                className="tracking-wide text-amber-500"
-                            >
+                            <span className="tracking-wide text-amber-500">
                                 {"\u2605".repeat(rogueRating)}
                                 <span className="text-slate-300">
                                     {"\u2605".repeat(5 - rogueRating)}
                                 </span>
                             </span>
-                        </div>
+
+                            <span className="text-xs font-bold text-emerald-800">
+                                Learn more
+                            </span>
+                        </Link>
                     )}
 
                     <div className="mt-4 space-y-2 text-slate-700">

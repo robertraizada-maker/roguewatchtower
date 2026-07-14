@@ -38,6 +38,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: "daily",
             priority: 0.9,
         },
+        {
+            url: absoluteUrl("/rogue-rating"),
+            lastModified: now,
+            changeFrequency: "monthly",
+            priority: 0.6,
+        },
         ...([14, 28] as const).map((range) => ({
             url: absoluteUrl(getRankingRangeHref(range)),
             lastModified: now,

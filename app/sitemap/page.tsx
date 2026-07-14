@@ -60,6 +60,11 @@ export default async function SitemapPage() {
                         </Link>
                     </li>
                     <li>
+                        <Link className="font-medium text-emerald-800 hover:underline" href="/rogue-rating">
+                            Rogue Rating
+                        </Link>
+                    </li>
+                    <li>
                         <Link className="font-medium text-emerald-800 hover:underline" href="/rogue-pokemon-tcg-decks">
                             All Decks
                         </Link>

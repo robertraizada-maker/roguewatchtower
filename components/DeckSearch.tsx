@@ -272,15 +272,17 @@ export default function DeckSearch({ decks }: Props) {
                                     </ul>
                                 </td>
                                 <td className="whitespace-nowrap px-4 py-4">
-                                    <span
-                                        aria-label={`${deck.rogueRating} out of 5 stars`}
-                                        className="font-semibold text-amber-500"
+                                    <Link
+                                        href="/rogue-rating"
+                                        aria-label={`${deck.rogueRating} out of 5 stars. Learn how Rogue Rating works.`}
+                                        title="Learn how Rogue Rating works"
+                                        className="cursor-pointer font-semibold text-amber-500 hover:underline focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:ring-offset-2"
                                     >
                                         {"\u2605".repeat(deck.rogueRating)}
                                         <span className="text-slate-300">
                                             {"\u2605".repeat(5 - deck.rogueRating)}
                                         </span>
-                                    </span>
+                                    </Link>
                                 </td>
                                 <td className="px-4 py-4 text-slate-700">
                                     {deck.player_name}
