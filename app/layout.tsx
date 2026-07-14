@@ -24,7 +24,14 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" data-theme="light" suppressHydrationWarning>
+            <head>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `try{var t=localStorage.getItem("roguewatchtower:theme");document.documentElement.dataset.theme=t==="dark"?"dark":"light"}catch{}`,
+                    }}
+                />
+            </head>
             <body className="bg-gray-50 text-gray-900">
                 <Header />
 
