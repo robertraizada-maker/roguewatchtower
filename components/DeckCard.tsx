@@ -207,9 +207,6 @@ export default function DeckCard({
                                 </span>
                             </span>
 
-                            <span className="text-xs font-bold text-emerald-800">
-                                Learn more
-                            </span>
                         </Link>
                     )}
 
