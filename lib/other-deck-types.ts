@@ -55,6 +55,85 @@ export const defaultOtherDeckTypes: OtherDeckType[] = [
             { minQuantity: 2, pokemonName: "Azumarill ex" },
         ],
     },
+    {
+        archetype: "Arboliva Absol",
+        criteria: [
+            { minQuantity: 2, pokemonName: "Arboliva ex" },
+            { minQuantity: 1, pokemonName: "Mega Absol ex" },
+        ],
+    },
+    {
+        archetype: "Cinccino Metang",
+        criteria: [
+            { minQuantity: 3, pokemonName: "Cinccino ex" },
+            { minQuantity: 3, pokemonName: "Metang" },
+        ],
+    },
+    {
+        archetype: "Dusknoir",
+        criteria: [
+            { minQuantity: 3, pokemonName: "Duskull" },
+            { minQuantity: 3, pokemonName: "Dusclops" },
+            { minQuantity: 2, pokemonName: "Dusknoir" },
+        ],
+    },
+    {
+        archetype: "Delphox Emboar",
+        criteria: [
+            { minQuantity: 3, pokemonName: "Fennekin" },
+            { minQuantity: 3, pokemonName: "Delphox" },
+            { minQuantity: 2, pokemonName: "Emboar" },
+        ],
+    },
+    {
+        archetype: "Chandelure",
+        criteria: [
+            { minQuantity: 3, pokemonName: "Litwick" },
+            { minQuantity: 3, pokemonName: "Chandelure" },
+        ],
+    },
+    {
+        archetype: "Mega Audino Cinderace",
+        criteria: [
+            { minQuantity: 2, pokemonName: "Mega Audino ex" },
+            { minQuantity: 3, pokemonName: "Cinderace" },
+        ],
+    },
+    {
+        archetype: "Mega Kangaskhan Dusknoir",
+        criteria: [
+            { minQuantity: 2, pokemonName: "Mega Kangaskhan ex" },
+            { minQuantity: 2, pokemonName: "Duskull" },
+        ],
+    },
+    {
+        archetype: "Mega Gardevoir",
+        criteria: [
+            { minQuantity: 3, pokemonName: "Ralts" },
+            { minQuantity: 2, pokemonName: "Mega Gardevoir ex" },
+        ],
+    },
+    {
+        archetype: "Arboliva Ogerpon",
+        criteria: [
+            { minQuantity: 2, pokemonName: "Smoliv" },
+            { minQuantity: 2, pokemonName: "Teal Mask Ogerpon" },
+        ],
+    },
+    {
+        archetype: "Froslass",
+        criteria: [
+            { minQuantity: 3, pokemonName: "Snorunt" },
+            { minQuantity: 3, pokemonName: "Froslass" },
+        ],
+    },
+    {
+        archetype: "Tyrantrum",
+        criteria: [
+            { minQuantity: 3, pokemonName: "Tyrunt" },
+            { minQuantity: 3, pokemonName: "Tyrantrum" },
+        ],
+    },
 ];
 
 const defaultFeaturedPokemonNameMatches: Array<{
@@ -159,3 +238,4 @@ export function formatOtherDeckTypeCriteria(criteria: OtherDeckTypeCriterion[]) 
         .map((criterion) => `${criterion.minQuantity} ${criterion.pokemonName}`)
         .join("\n");
 }
+
