@@ -21,6 +21,12 @@ export default function PrivacyPolicyPage() {
                 </p>
 
                 <p className="mt-4 leading-7 text-slate-700">
+                    If you choose Dark mode, that preference is saved in your own
+                    browser so the site can remember it next time. We do not use
+                    cookies for this, and the setting does not tell us who you are.
+                </p>
+
+                <p className="mt-4 leading-7 text-slate-700">
                     If you contact us, we will only use the information you provide
                     to respond to your enquiry.
                 </p>
