@@ -33,6 +33,16 @@ robert.raizada
 
 You can override the username with an optional `ADMIN_USERNAME` environment variable.
 Do not store the admin password in this repository or any `.env` file.
+## Admin Redeploy Button
+
+The `/admin` page can trigger a Cloudflare Pages redeploy through a deploy hook.
+Create a Cloudflare Pages deploy hook for the production branch and set this secret in Cloudflare Pages:
+
+```text
+CLOUDFLARE_PAGES_DEPLOY_HOOK_URL
+```
+
+Do not store the deploy hook URL in this repository or any `.env` file.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

@@ -1,3 +1,5 @@
+import AdminRedeployButton from "./AdminRedeployButton";
+
 export default function AdminPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900">
@@ -41,6 +43,18 @@ export default function AdminPage() {
             >
               Manage Other Deck Types
             </a>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
+            <h2 className="text-2xl font-semibold">
+              Publish Changes
+            </h2>
+
+            <p className="mt-3 text-slate-600">
+              Start a Cloudflare Pages redeploy so new archetype names appear on the static site.
+            </p>
+
+            <AdminRedeployButton />
           </div>
         </div>
       </section>

@@ -62,6 +62,57 @@ function timingSafeEqual(left, right) {
     return difference === 0;
 }
 
+function json(data, init = {}) {
+    return new Response(JSON.stringify(data), {
+        ...init,
+        headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "private, no-store",
+            ...(init.headers || {}),
+        },
+    });
+}
+
+async function handleRedeploy(request, env) {
+    if (request.method !== "POST") {
+        return json(
+            { success: false, error: "Method not allowed." },
+            { status: 405, headers: { Allow: "POST" } }
+        );
+    }
+
+    const deployHookUrl = env.CLOUDFLARE_PAGES_DEPLOY_HOOK_URL;
+
+    if (!deployHookUrl) {
+        return json(
+            {
+                success: false,
+                error: "CLOUDFLARE_PAGES_DEPLOY_HOOK_URL is not configured.",
+            },
+            { status: 503 }
+        );
+    }
+
+    const deployResponse = await fetch(deployHookUrl, {
+        method: "POST",
+    });
+
+    if (!deployResponse.ok) {
+        return json(
+            {
+                success: false,
+                error: `Deploy hook failed with status ${deployResponse.status}.`,
+            },
+            { status: 502 }
+        );
+    }
+
+    return json({
+        success: true,
+        message: "Redeploy started.",
+    });
+}
+
 export async function onRequest(context) {
     const expectedUsername =
         context.env.ADMIN_USERNAME || DEFAULT_ADMIN_USERNAME;
@@ -88,6 +139,12 @@ export async function onRequest(context) {
 
     if (!usernameMatches || !passwordMatches) {
         return unauthorized();
+    }
+
+    const url = new URL(context.request.url);
+
+    if (url.pathname.replace(/\/$/, "") === "/admin/redeploy") {
+        return handleRedeploy(context.request, context.env);
     }
 
     const response = await context.next();
