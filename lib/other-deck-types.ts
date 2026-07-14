@@ -48,6 +48,13 @@ export const defaultOtherDeckTypes: OtherDeckType[] = [
             { minQuantity: 2, pokemonName: "Arboliva ex" },
         ],
     },
+    {
+        archetype: "Floette Azumarill",
+        criteria: [
+            { minQuantity: 2, pokemonName: "Mega Floette ex" },
+            { minQuantity: 2, pokemonName: "Azumarill ex" },
+        ],
+    },
 ];
 
 const defaultFeaturedPokemonNameMatches: Array<{
