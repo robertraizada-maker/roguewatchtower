@@ -112,7 +112,7 @@ export const defaultOtherDeckTypes: OtherDeckType[] = [
         ],
     },
     {
-        archetype: "Kangaskhan Jellicent",
+        archetype: "Slop Box Jellicent",
         criteria: [
             { minQuantity: 3, pokemonName: "Mega Kangaskhan ex" },
             { minQuantity: 2, pokemonName: "Jellicent ex" },
@@ -165,7 +165,7 @@ const defaultFeaturedPokemonNameMatches: Array<{
         pokemonNames: ["Dunsparce", "Crabrawler"],
     },
     {
-        archetype: "Kangaskhan Jellicent",
+        archetype: "Slop Box Jellicent",
         pokemonNames: ["Lillie's Clefairy ex", "Mega Kangaskhan ex"],
     },
 ];
@@ -285,9 +285,7 @@ export function parseStoredOtherDeckTypes(storedValue: string | null) {
             })
             .filter((deckType): deckType is OtherDeckType => deckType !== null);
 
-        return otherDeckTypes.length > 0
-            ? [...defaultOtherDeckTypes, ...otherDeckTypes]
-            : undefined;
+        return otherDeckTypes.length > 0 ? otherDeckTypes : undefined;
     } catch {
         return undefined;
     }
