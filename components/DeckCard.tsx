@@ -2,11 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 
 import { getArchetypeIconUrls } from "@/lib/archetype-icons";
 import { getDeckDisplayName } from "@/lib/deck-display";
 import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
+import {
+    OTHER_DECK_TYPES_STORAGE_KEY,
+    parseStoredOtherDeckTypes,
+} from "@/lib/other-deck-types";
 
 interface DeckCardProps {
     rank: number;
@@ -25,6 +29,16 @@ interface DeckCardProps {
     showRankLabel?: boolean;
     showOutlawAward?: boolean;
     highlightTopDeck?: boolean;
+}
+
+function subscribeToStoredOtherDeckTypes(onStoreChange: () => void) {
+    window.addEventListener("storage", onStoreChange);
+
+    return () => window.removeEventListener("storage", onStoreChange);
+}
+
+function getStoredOtherDeckTypesSnapshot() {
+    return window.localStorage.getItem(OTHER_DECK_TYPES_STORAGE_KEY);
 }
 
 function getRankLabel(rank: number) {
@@ -82,7 +96,20 @@ export default function DeckCard({
     const finishPercent = ((standing / players) * 100).toFixed(1);
     const isTopDeckHighlight = highlightTopDeck && rank === 1;
     const isOutlawAward = showOutlawAward && rank === 1 && standing === 1 && players >= 32;
-    const displayArchetype = getDeckDisplayName(archetype, decklistExport);
+    const storedOtherDeckTypesSnapshot = useSyncExternalStore(
+        subscribeToStoredOtherDeckTypes,
+        getStoredOtherDeckTypesSnapshot,
+        () => null
+    );
+    const storedOtherDeckTypes = useMemo(
+        () => parseStoredOtherDeckTypes(storedOtherDeckTypesSnapshot),
+        [storedOtherDeckTypesSnapshot]
+    );
+    const displayArchetype = getDeckDisplayName(
+        archetype,
+        decklistExport,
+        storedOtherDeckTypes
+    );
     const tournamentUrl = getLimitlessTournamentDetailsUrl(tournamentId);
     const iconUrls =
         getArchetypeIconUrls(displayArchetype, archetypeIcons);
@@ -288,4 +315,3 @@ export default function DeckCard({
         </article>
     );
 }
-

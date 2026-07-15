@@ -10,6 +10,11 @@ export interface OtherDeckType {
 
 export const OTHER_DECK_TYPES_STORAGE_KEY = "roguewatchtower:other-deck-types";
 
+interface StoredOtherDeckType {
+    archetype?: string;
+    criteriaText?: string;
+}
+
 export const defaultOtherDeckTypes: OtherDeckType[] = [
     {
         archetype: "Drakloak Control",
@@ -107,6 +112,13 @@ export const defaultOtherDeckTypes: OtherDeckType[] = [
         ],
     },
     {
+        archetype: "Kangaskhan Jellicent",
+        criteria: [
+            { minQuantity: 3, pokemonName: "Mega Kangaskhan ex" },
+            { minQuantity: 2, pokemonName: "Jellicent ex" },
+        ],
+    },
+    {
         archetype: "Mega Gardevoir",
         criteria: [
             { minQuantity: 3, pokemonName: "Ralts" },
@@ -151,6 +163,10 @@ const defaultFeaturedPokemonNameMatches: Array<{
     {
         archetype: "Crabominable Dudunsparce",
         pokemonNames: ["Dunsparce", "Crabrawler"],
+    },
+    {
+        archetype: "Kangaskhan Jellicent",
+        pokemonNames: ["Lillie's Clefairy ex", "Mega Kangaskhan ex"],
     },
 ];
 
@@ -239,3 +255,40 @@ export function formatOtherDeckTypeCriteria(criteria: OtherDeckTypeCriterion[]) 
         .join("\n");
 }
 
+export function parseStoredOtherDeckTypes(storedValue: string | null) {
+    if (!storedValue) {
+        return undefined;
+    }
+
+    try {
+        const storedDeckTypes = JSON.parse(storedValue) as StoredOtherDeckType[];
+
+        if (!Array.isArray(storedDeckTypes)) {
+            return undefined;
+        }
+
+        const otherDeckTypes = storedDeckTypes
+            .map((deckType): OtherDeckType | null => {
+                const archetype = deckType.archetype?.trim();
+                const criteria = parseOtherDeckTypeCriteria(
+                    deckType.criteriaText ?? ""
+                );
+
+                if (!archetype || criteria.length === 0) {
+                    return null;
+                }
+
+                return {
+                    archetype,
+                    criteria,
+                };
+            })
+            .filter((deckType): deckType is OtherDeckType => deckType !== null);
+
+        return otherDeckTypes.length > 0
+            ? [...defaultOtherDeckTypes, ...otherDeckTypes]
+            : undefined;
+    } catch {
+        return undefined;
+    }
+}
