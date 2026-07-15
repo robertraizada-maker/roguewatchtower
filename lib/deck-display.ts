@@ -13,6 +13,10 @@ interface PokemonCardLine {
     order: number;
 }
 
+const renamedArchetypes = new Map([
+    ["Kangaskhan Jellicent", "Slop Box Jellicent"],
+]);
+
 function parsePokemonCardLine(line: string, order: number): PokemonCardLine | null {
     const match = /^(\d+)\s+(.+)\s+([A-Z0-9]{2,8})\s+([A-Z]*\d+[a-z]?)$/i.exec(line.trim());
 
@@ -122,6 +126,12 @@ export function getDeckDisplayName(
     decklistExport: string | null,
     otherDeckTypes?: OtherDeckType[]
 ) {
+    const renamedArchetype = renamedArchetypes.get(deckName);
+
+    if (renamedArchetype) {
+        return renamedArchetype;
+    }
+
     const matchingDeckType = findMatchingOtherDeckType(
         getPokemonCounts(decklistExport),
         otherDeckTypes

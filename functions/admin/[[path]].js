@@ -84,10 +84,15 @@ async function handleRedeploy(request, env) {
     const deployHookUrl = env.CLOUDFLARE_PAGES_DEPLOY_HOOK_URL;
 
     if (!deployHookUrl) {
+        const visibleKeys = Object.keys(env || {})
+            .filter((key) => !key.toLowerCase().includes("password"))
+            .sort()
+            .join(", ") || "none";
+
         return json(
             {
                 success: false,
-                error: "CLOUDFLARE_PAGES_DEPLOY_HOOK_URL is not configured.",
+                error: `CLOUDFLARE_PAGES_DEPLOY_HOOK_URL is not configured. Visible env keys: ${visibleKeys}`,
             },
             { status: 503 }
         );
