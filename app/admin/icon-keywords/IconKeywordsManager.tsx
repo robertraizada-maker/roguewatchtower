@@ -89,23 +89,42 @@ export default function IconKeywordsManager() {
                 </div>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">
-                    Preview
-                </h2>
+            <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div className="border-b border-slate-200 p-5">
+                    <h2 className="text-xl font-bold text-slate-900">
+                        Ignored Keywords Table
+                    </h2>
+                </div>
 
-                <div className="mt-4 rounded-md bg-slate-50 p-4 text-sm text-slate-700">
-                    {keywords.length > 0 ? (
-                        <ul className="space-y-2">
-                            {keywords.map((keyword) => (
-                                <li key={keyword} className="font-mono">
-                                    {keyword}
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>No keywords entered.</p>
-                    )}
+                <div className="overflow-x-auto">
+                    <table className="min-w-full border-collapse text-left text-sm">
+                        <thead className="bg-slate-50 text-xs font-bold uppercase text-slate-600">
+                            <tr>
+                                <th className="px-4 py-3">Keyword</th>
+                                <th className="px-4 py-3">Match</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200">
+                            {keywords.length > 0 ? (
+                                keywords.map((keyword) => (
+                                    <tr key={keyword}>
+                                        <td className="px-4 py-4 font-mono font-semibold text-slate-900">
+                                            {keyword}
+                                        </td>
+                                        <td className="px-4 py-4 text-slate-700">
+                                            Ignored as a whole word in deck names
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td className="px-4 py-4 text-slate-500" colSpan={2}>
+                                        No keywords entered.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </div>

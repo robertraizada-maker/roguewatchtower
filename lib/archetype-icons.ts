@@ -1,3 +1,5 @@
+import { defaultIgnoredIconKeywords } from "@/lib/icon-keywords";
+
 const ICON_BASE_URL = "https://r2.limitlesstcg.net/pokemon/gen9";
 
 const ARCHETYPE_ICON_SLUGS: Record<string, string[]> = {
@@ -105,7 +107,7 @@ function getOtherPokemonNames(archetype: string) {
 
 function getArchetypePokemonNames(
     archetype: string,
-    ignoredIconKeywords = DEFAULT_IGNORED_ICON_KEYWORDS
+    ignoredIconKeywords = defaultIgnoredIconKeywords
 ) {
     const otherPokemonNames = getOtherPokemonNames(archetype);
 

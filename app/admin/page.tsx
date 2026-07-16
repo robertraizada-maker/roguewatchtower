@@ -15,21 +15,6 @@ export default function AdminPage() {
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-2xl font-semibold">
-              Daily Import
-            </h2>
-
-            <p className="mt-3 text-slate-600">
-              The first version will fetch yesterday&apos;s Standard tournaments,
-              filter to events with 50 or more players, and display the results.
-            </p>
-
-            <button className="mt-6 rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800">
-              Import Yesterday
-            </button>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold">
               Other Deck Types
             </h2>
 
@@ -62,7 +47,7 @@ export default function AdminPage() {
             </a>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-2xl font-semibold">
               Publish Changes
             </h2>
@@ -72,6 +57,21 @@ export default function AdminPage() {
             </p>
 
             <AdminRedeployButton />
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-2xl font-semibold">
+              Daily Import
+            </h2>
+
+            <p className="mt-3 text-slate-600">
+              The first version will fetch yesterday&apos;s Standard tournaments,
+              filter to events with 50 or more players, and display the results.
+            </p>
+
+            <button className="mt-6 rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800">
+              Import Yesterday
+            </button>
           </div>
         </div>
       </section>
