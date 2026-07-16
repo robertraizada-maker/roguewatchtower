@@ -6,6 +6,10 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 
 import { getArchetypeIconUrls } from "@/lib/archetype-icons";
 import { getDeckDisplayName } from "@/lib/deck-display";
+import {
+    ICON_KEYWORDS_STORAGE_KEY,
+    parseIgnoredIconKeywords,
+} from "@/lib/icon-keywords";
 import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
 import {
     OTHER_DECK_TYPES_STORAGE_KEY,
@@ -39,6 +43,10 @@ function subscribeToStoredOtherDeckTypes(onStoreChange: () => void) {
 
 function getStoredOtherDeckTypesSnapshot() {
     return window.localStorage.getItem(OTHER_DECK_TYPES_STORAGE_KEY);
+}
+
+function getStoredIconKeywordsSnapshot() {
+    return window.localStorage.getItem(ICON_KEYWORDS_STORAGE_KEY);
 }
 
 function getRankLabel(rank: number) {
@@ -105,14 +113,26 @@ export default function DeckCard({
         () => parseStoredOtherDeckTypes(storedOtherDeckTypesSnapshot),
         [storedOtherDeckTypesSnapshot]
     );
+    const storedIconKeywordsSnapshot = useSyncExternalStore(
+        subscribeToStoredOtherDeckTypes,
+        getStoredIconKeywordsSnapshot,
+        () => null
+    );
+    const ignoredIconKeywords = useMemo(
+        () => parseIgnoredIconKeywords(storedIconKeywordsSnapshot),
+        [storedIconKeywordsSnapshot]
+    );
     const displayArchetype = getDeckDisplayName(
         archetype,
         decklistExport,
         storedOtherDeckTypes
     );
     const tournamentUrl = getLimitlessTournamentDetailsUrl(tournamentId);
-    const iconUrls =
-        getArchetypeIconUrls(displayArchetype, archetypeIcons);
+    const iconUrls = getArchetypeIconUrls(
+        displayArchetype,
+        archetypeIcons,
+        ignoredIconKeywords
+    );
 
     const [copied, setCopied] = useState(false);
 

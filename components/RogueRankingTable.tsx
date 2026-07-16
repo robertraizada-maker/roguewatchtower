@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
+import { slugifyPokemonName } from "@/lib/archetype-icons";
 import { getDeckDisplayName } from "@/lib/deck-display";
 import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
 import {
@@ -157,7 +158,13 @@ export default function RogueRankingTable({ decks, selectedRange }: Props) {
                                 </td>
                                 <td className="px-4 py-4">
                                     <Link
-                                        href={`/decks-of-the-day/${deck.reportDate}#${getDeckAnchorId(deck)}`}
+                                        href={`/rogue-deck/${slugifyPokemonName(
+                                            getDeckDisplayName(
+                                                deck.deck_name,
+                                                deck.decklist_export,
+                                                storedOtherDeckTypes
+                                            )
+                                        )}`}
                                         className="font-bold text-emerald-800 hover:underline"
                                     >
                                         {getDeckDisplayName(

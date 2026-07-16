@@ -45,6 +45,23 @@ export default function AdminPage() {
             </a>
           </div>
 
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-2xl font-semibold">
+              Icon Keywords
+            </h2>
+
+            <p className="mt-3 text-slate-600">
+              Exclude non-Pokemon words from deck names before matching icons.
+            </p>
+
+            <a
+              href="/admin/icon-keywords"
+              className="mt-6 inline-block rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800"
+            >
+              Manage Icon Keywords
+            </a>
+          </div>
+
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
             <h2 className="text-2xl font-semibold">
               Publish Changes

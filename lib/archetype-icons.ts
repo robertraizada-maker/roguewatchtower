@@ -57,6 +57,8 @@ const MULTI_WORD_ICON_NAMES = [
     "Raging Bolt",
 ].sort((a, b) => b.length - a.length);
 
+const DEFAULT_IGNORED_ICON_KEYWORDS = ["slop", "box"];
+
 export function slugifyPokemonName(name: string) {
     return name
         .replace(/'s\b/gi, "")
@@ -101,7 +103,10 @@ function getOtherPokemonNames(archetype: string) {
         .filter(Boolean);
 }
 
-function getArchetypePokemonNames(archetype: string) {
+function getArchetypePokemonNames(
+    archetype: string,
+    ignoredIconKeywords = DEFAULT_IGNORED_ICON_KEYWORDS
+) {
     const otherPokemonNames = getOtherPokemonNames(archetype);
 
     if (otherPokemonNames.length > 0) {
@@ -110,6 +115,9 @@ function getArchetypePokemonNames(archetype: string) {
 
     const names: string[] = [];
     let remaining = archetype.trim();
+    const ignoredKeywordSet = new Set(
+        ignoredIconKeywords.map((keyword) => keyword.trim().toLowerCase())
+    );
 
     while (remaining && names.length < 2) {
         const megaFallbackMatch = /^mega\s+(\S+)/i.exec(remaining);
@@ -131,6 +139,12 @@ function getArchetypePokemonNames(archetype: string) {
         }
 
         const [name, ...rest] = remaining.split(/\s+/);
+
+        if (ignoredKeywordSet.has(name.toLowerCase())) {
+            remaining = rest.join(" ").trim();
+            continue;
+        }
+
         names.push(name);
         remaining = rest.join(" ").trim();
     }
@@ -140,7 +154,8 @@ function getArchetypePokemonNames(archetype: string) {
 
 export function getArchetypeIconUrls(
     archetype: string,
-    explicitIconUrls?: string[]
+    explicitIconUrls?: string[],
+    ignoredIconKeywords?: string[]
 ) {
     if (explicitIconUrls && explicitIconUrls.length > 0) {
         return explicitIconUrls;
@@ -148,7 +163,9 @@ export function getArchetypeIconUrls(
 
     const slugs =
         ARCHETYPE_ICON_SLUGS[archetype] ||
-        getArchetypePokemonNames(archetype).map(getIconSlug).filter(Boolean);
+        getArchetypePokemonNames(archetype, ignoredIconKeywords)
+            .map(getIconSlug)
+            .filter(Boolean);
 
     return slugs.map((slug) =>
         slug.startsWith("http") ? slug : `${ICON_BASE_URL}/${slug}.png`

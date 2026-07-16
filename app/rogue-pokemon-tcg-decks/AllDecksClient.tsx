@@ -2,10 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 import { getArchetypeIconUrls, slugifyPokemonName } from "@/lib/archetype-icons";
 import { getDeckDisplayName } from "@/lib/deck-display";
+import {
+    ICON_KEYWORDS_STORAGE_KEY,
+    parseIgnoredIconKeywords,
+} from "@/lib/icon-keywords";
 
 import type { RankingDeck } from "@/lib/rogue-ranking";
 
@@ -25,7 +29,20 @@ function getDeckCountLabel(count: number) {
     return count === 1 ? "1 deck" : `${count} decks`;
 }
 
-function getArchetypes(decks: RankingDeck[]): ArchetypeSummary[] {
+function subscribeToStoredIconKeywords(onStoreChange: () => void) {
+    window.addEventListener("storage", onStoreChange);
+
+    return () => window.removeEventListener("storage", onStoreChange);
+}
+
+function getStoredIconKeywordsSnapshot() {
+    return window.localStorage.getItem(ICON_KEYWORDS_STORAGE_KEY);
+}
+
+function getArchetypes(
+    decks: RankingDeck[],
+    ignoredIconKeywords: string[]
+): ArchetypeSummary[] {
     const grouped = new Map<string, RankingDeck[]>();
 
     decks.forEach((deck) => {
@@ -52,7 +69,7 @@ function getArchetypes(decks: RankingDeck[]): ArchetypeSummary[] {
                 slug: slugifyPokemonName(name),
                 rogueRating: bestDeck?.rogueRating ?? 0,
                 deckCount: archetypeDecks.length,
-                iconUrls: getArchetypeIconUrls(name),
+                iconUrls: getArchetypeIconUrls(name, undefined, ignoredIconKeywords),
             };
         })
         .sort((a, b) => {
@@ -65,9 +82,18 @@ function getArchetypes(decks: RankingDeck[]): ArchetypeSummary[] {
 }
 
 export default function AllDecksClient({ decks }: Props) {
+    const storedIconKeywordsSnapshot = useSyncExternalStore(
+        subscribeToStoredIconKeywords,
+        getStoredIconKeywordsSnapshot,
+        () => null
+    );
+    const ignoredIconKeywords = useMemo(
+        () => parseIgnoredIconKeywords(storedIconKeywordsSnapshot),
+        [storedIconKeywordsSnapshot]
+    );
     const archetypes = useMemo(
-        () => getArchetypes(decks),
-        [decks]
+        () => getArchetypes(decks, ignoredIconKeywords),
+        [decks, ignoredIconKeywords]
     );
     const ratingGroups = [5, 4, 3, 2, 1]
         .map((rating) => ({
