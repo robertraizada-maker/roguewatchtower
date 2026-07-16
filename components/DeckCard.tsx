@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
-import { getArchetypeIconUrls } from "@/lib/archetype-icons";
+import { getArchetypeIconUrls, slugifyPokemonName } from "@/lib/archetype-icons";
 import { getDeckDisplayName } from "@/lib/deck-display";
 import {
     ICON_KEYWORDS_STORAGE_KEY,
@@ -234,7 +234,12 @@ export default function DeckCard({
                         </div>
 
                         <h2 className="min-w-0 text-2xl font-bold text-slate-900">
-                            {displayArchetype}
+                            <Link
+                                href={`/rogue-deck/${slugifyPokemonName(displayArchetype)}`}
+                                className="text-slate-900 hover:text-emerald-800 hover:underline focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:ring-offset-2"
+                            >
+                                {displayArchetype}
+                            </Link>
                         </h2>
                     </div>
 
