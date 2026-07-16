@@ -91,6 +91,15 @@ export const defaultOtherDeckTypes: OtherDeckType[] = [
         ],
     },
     {
+        archetype: "Chandelure Frosmoth",
+        criteria: [
+            { minQuantity: 3, pokemonName: "Litwick" },
+            { minQuantity: 3, pokemonName: "Chandelure" },
+            { minQuantity: 3, pokemonName: "Snom" },
+            { minQuantity: 3, pokemonName: "Frosmoth" },
+        ],
+    },
+    {
         archetype: "Chandelure",
         criteria: [
             { minQuantity: 3, pokemonName: "Litwick" },

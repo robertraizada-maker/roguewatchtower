@@ -132,6 +132,10 @@ export function getDeckDisplayName(
         return renamedArchetype;
     }
 
+    if (deckName !== "Other") {
+        return deckName;
+    }
+
     const matchingDeckType = findMatchingOtherDeckType(
         getPokemonCounts(decklistExport),
         otherDeckTypes
@@ -139,10 +143,6 @@ export function getDeckDisplayName(
 
     if (matchingDeckType) {
         return matchingDeckType.archetype;
-    }
-
-    if (deckName !== "Other") {
-        return deckName;
     }
 
     const featuredPokemonNames = getFeaturedPokemonNames(decklistExport);
