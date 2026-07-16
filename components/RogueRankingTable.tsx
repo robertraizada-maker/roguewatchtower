@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 
 import { getDeckDisplayName } from "@/lib/deck-display";
 import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
+import {
+    OTHER_DECK_TYPES_STORAGE_KEY,
+    parseStoredOtherDeckTypes,
+} from "@/lib/other-deck-types";
 import { getDeckAnchorId } from "@/lib/rogue-rating";
 import type { RankingDeck } from "@/lib/rogue-ranking";
 import {
@@ -55,8 +59,27 @@ function sortDecks(decks: RankingDeck[], sortOption: SortOption) {
     });
 }
 
+function subscribeToStoredOtherDeckTypes(onStoreChange: () => void) {
+    window.addEventListener("storage", onStoreChange);
+
+    return () => window.removeEventListener("storage", onStoreChange);
+}
+
+function getStoredOtherDeckTypesSnapshot() {
+    return window.localStorage.getItem(OTHER_DECK_TYPES_STORAGE_KEY);
+}
+
 export default function RogueRankingTable({ decks, selectedRange }: Props) {
     const [sortOption, setSortOption] = useState<SortOption>("rogue-ranking");
+    const storedOtherDeckTypesSnapshot = useSyncExternalStore(
+        subscribeToStoredOtherDeckTypes,
+        getStoredOtherDeckTypesSnapshot,
+        () => null
+    );
+    const storedOtherDeckTypes = useMemo(
+        () => parseStoredOtherDeckTypes(storedOtherDeckTypesSnapshot),
+        [storedOtherDeckTypesSnapshot]
+    );
     const rankedDecks = useMemo(
         () => sortDecks(
             decks.filter((deck) => deck.dateIndex < selectedRange),
@@ -137,7 +160,11 @@ export default function RogueRankingTable({ decks, selectedRange }: Props) {
                                         href={`/decks-of-the-day/${deck.reportDate}#${getDeckAnchorId(deck)}`}
                                         className="font-bold text-emerald-800 hover:underline"
                                     >
-                                        {getDeckDisplayName(deck.deck_name, deck.decklist_export)}
+                                        {getDeckDisplayName(
+                                            deck.deck_name,
+                                            deck.decklist_export,
+                                            storedOtherDeckTypes
+                                        )}
                                     </Link>
                                     <div className="mt-1 text-xs text-slate-500">
                                         Daily rank #{deck.dailyRank}
