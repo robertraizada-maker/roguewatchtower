@@ -35,6 +35,12 @@ interface DeckCardProps {
     highlightTopDeck?: boolean;
 }
 
+interface DecklistSections {
+    pokemon: string;
+    hidden: string;
+    hasHiddenSections: boolean;
+}
+
 function subscribeToStoredOtherDeckTypes(onStoreChange: () => void) {
     window.addEventListener("storage", onStoreChange);
 
@@ -81,6 +87,55 @@ function getOrdinal(value: number) {
         default:
             return `${value}th`;
     }
+}
+
+function getDecklistSections(decklistExport: string | null): DecklistSections {
+    if (!decklistExport) {
+        return {
+            pokemon: "",
+            hidden: "",
+            hasHiddenSections: false,
+        };
+    }
+
+    const lines = decklistExport.trim().split(/\r?\n/);
+    const firstHiddenHeadingIndex = lines.findIndex((line) =>
+        /^(Trainer|Energy):/i.test(line.trim())
+    );
+
+    if (firstHiddenHeadingIndex === -1) {
+        return {
+            pokemon: decklistExport.trim(),
+            hidden: "",
+            hasHiddenSections: false,
+        };
+    }
+
+    const pokemon = lines.slice(0, firstHiddenHeadingIndex).join("\n").trim();
+    const hidden = lines.slice(firstHiddenHeadingIndex).join("\n").trim();
+
+    return {
+        pokemon,
+        hidden,
+        hasHiddenSections: hidden.length > 0,
+    };
+}
+
+function ChevronIcon({ expanded }: { expanded: boolean }) {
+    return (
+        <svg
+            aria-hidden="true"
+            className={`h-4 w-4 transition-transform duration-150 ${expanded ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+        >
+            <path d="m6 9 6 6 6-6" />
+        </svg>
+    );
 }
 
 export default function DeckCard({
@@ -133,8 +188,14 @@ export default function DeckCard({
         archetypeIcons,
         ignoredIconKeywords
     );
+    const decklistSections = useMemo(
+        () => getDecklistSections(decklistExport),
+        [decklistExport]
+    );
+    const hiddenDecklistId = `${anchorId}-hidden-decklist`;
 
     const [copied, setCopied] = useState(false);
+    const [isFullDecklistVisible, setIsFullDecklistVisible] = useState(false);
 
     async function copyDecklist() {
         if (!decklistExport) {
@@ -160,7 +221,7 @@ export default function DeckCard({
             JSON.stringify({
                 archetype: displayArchetype,
                 player,
-    tournamentId,
+                tournamentId,
                 tournament,
                 decklist: decklistExport,
             })
@@ -258,7 +319,6 @@ export default function DeckCard({
                                     {"\u2605".repeat(5 - rogueRating)}
                                 </span>
                             </span>
-
                         </Link>
                     )}
 
@@ -269,7 +329,8 @@ export default function DeckCard({
                             <p>Competition date: {formatCompetitionDate(reportDate)}</p>
                         )}
 
-                        <p>{isOutlawAward
+                        <p>
+                            {isOutlawAward
                                 ? `Won a ${players}-player tournament`
                                 : `${getOrdinal(standing)} of ${players} players`}
                         </p>
@@ -295,14 +356,51 @@ export default function DeckCard({
 
                 <div className="min-w-0 border-t border-slate-300 pt-6 md:border-l md:border-t-0 md:pl-6 md:pt-0">
                     {decklistExport ? (
-                        <pre
-                            className="overflow-auto whitespace-pre-wrap text-sm leading-6 text-slate-800"
-                            style={{
-                                fontFamily: "Consolas, 'Courier New', monospace",
-                            }}
-                        >
-                            {decklistExport}
-                        </pre>
+                        <div>
+                            <pre
+                                className="overflow-auto whitespace-pre-wrap text-sm leading-6 text-slate-800"
+                                style={{
+                                    fontFamily: "Consolas, 'Courier New', monospace",
+                                }}
+                            >
+                                {decklistSections.pokemon}
+                            </pre>
+
+                            {decklistSections.hasHiddenSections && (
+                                <>
+                                    <div
+                                        id={hiddenDecklistId}
+                                        className={`grid transition-all duration-200 ease-out ${
+                                            isFullDecklistVisible
+                                                ? "mt-4 grid-rows-[1fr] opacity-100"
+                                                : "grid-rows-[0fr] opacity-0"
+                                        }`}
+                                    >
+                                        <div className="overflow-hidden">
+                                            <pre
+                                                className="overflow-auto whitespace-pre-wrap text-sm leading-6 text-slate-800"
+                                                style={{
+                                                    fontFamily: "Consolas, 'Courier New', monospace",
+                                                }}
+                                            >
+                                                {decklistSections.hidden}
+                                            </pre>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        aria-expanded={isFullDecklistVisible}
+                                        aria-controls={hiddenDecklistId}
+                                        onClick={() => setIsFullDecklistVisible((visible) => !visible)}
+                                        className="mt-4 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:ring-offset-2"
+                                    >
+                                        <ChevronIcon expanded={isFullDecklistVisible} />
+                                        {isFullDecklistVisible ? "Show Pokemon only" : "Show full list"}
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     ) : (
                         <p className="text-sm text-slate-500">
                             Decklist unavailable.
