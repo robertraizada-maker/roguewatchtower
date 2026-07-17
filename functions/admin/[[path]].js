@@ -365,7 +365,68 @@ async function handleYesterdayImport(request, env) {
         data,
     });
 }
-export async function onRequest(context) {
+
+async function handleImportHistory(request, env, url) {
+    if (request.method !== "GET" && request.method !== "DELETE") {
+        return json(
+            { success: false, error: "Method not allowed." },
+            { status: 405, headers: { Allow: "GET, DELETE" } }
+        );
+    }
+
+    const apiBaseUrl = getApiBaseUrl(env);
+
+    if (!apiBaseUrl) {
+        return json(
+            {
+                success: false,
+                error: "NEXT_PUBLIC_API_BASE_URL or API_BASE_URL is not configured.",
+            },
+            { status: 503 }
+        );
+    }
+
+    const importsEndpoint =
+        env.IMPORT_HISTORY_ENDPOINT || `${apiBaseUrl}/admin/imports`;
+    const targetUrl = new URL(importsEndpoint);
+
+    if (request.method === "GET") {
+        const limit = url.searchParams.get("limit");
+
+        if (limit) {
+            targetUrl.searchParams.set("limit", limit);
+        }
+    }
+
+    if (request.method === "DELETE") {
+        const date = url.searchParams.get("date");
+
+        if (!date) {
+            return json(
+                { success: false, error: "Missing import date." },
+                { status: 400 }
+            );
+        }
+
+        targetUrl.searchParams.set("date", date);
+    }
+
+    const data = await proxyJson(request, env, targetUrl.toString(), {
+        method: request.method,
+        body: undefined,
+    });
+
+    if (data instanceof Response) {
+        return data;
+    }
+
+    return json({
+        success: true,
+        latestImport: data.latestImport ?? null,
+        imports: data.imports ?? [],
+        message: data.message,
+    });
+}export async function onRequest(context) {
     const expectedUsername =
         context.env.ADMIN_USERNAME || DEFAULT_ADMIN_USERNAME;
     const expectedPassword = context.env.ADMIN_PASSWORD;
@@ -398,6 +459,11 @@ export async function onRequest(context) {
 
     if (path === "/admin/redeploy") {
         return handleRedeploy(context.request, context.env);
+    }
+
+
+    if (path === "/admin/imports/data") {
+        return handleImportHistory(context.request, context.env, url);
     }
 
     if (path === "/admin/import/yesterday") {
