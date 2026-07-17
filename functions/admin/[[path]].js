@@ -342,6 +342,9 @@ async function handleYesterdayImport(request, env) {
         env.DELETE_YESTERDAY_ENDPOINT ||
         env.DAILY_DELETE_ENDPOINT ||
         `${apiBaseUrl}/admin/import/yesterday`;
+    const repopulateEndpoint =
+        env.DECK_OF_THE_DAY_REPOPULATE_ENDPOINT ||
+        `${apiBaseUrl}/admin/deck-of-the-day/repopulate`;
     const isDelete = request.method === "DELETE";
     const endpoint = isDelete ? deleteEndpoint : importEndpoint;
     const targetUrl = isDelete ? withDateParam(endpoint, date) : endpoint;
@@ -354,15 +357,27 @@ async function handleYesterdayImport(request, env) {
         return data;
     }
 
+    let repopulateData = null;
+
+    if (!isDelete) {
+        repopulateData = await proxyJson(request, env, repopulateEndpoint, {
+            method: "POST",
+            body: JSON.stringify({ date }),
+        });
+
+        if (repopulateData instanceof Response) {
+            return repopulateData;
+        }
+    }
+
     return json({
         success: true,
         date,
-        message:
-            data?.message ||
-            (isDelete
-                ? `Deleted data for ${date}.`
-                : `Import started for ${date}.`),
+        message: isDelete
+            ? data?.message || `Deleted data for ${date}.`
+            : `Import completed and ${date} has been rebuilt with active meta criteria.`,
         data,
+        repopulateData,
     });
 }
 
