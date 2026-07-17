@@ -153,7 +153,7 @@ export default function YesterdayImportCard() {
                 href="/admin/imports"
                 className="mt-6 inline-block rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800"
             >
-                View Import History
+                Manage Imports
             </Link>
         </div>
     );

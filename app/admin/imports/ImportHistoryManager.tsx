@@ -17,7 +17,29 @@ interface ImportRunSummary {
     tournamentsUpdated: number;
 }
 
-type LoadStatus = "loading" | "success" | "error" | "deleting";
+type LoadStatus = "loading" | "success" | "error" | "deleting" | "importing";
+
+function getYesterdayDate() {
+    const date = new Date();
+    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCDate(date.getUTCDate() - 1);
+    return date.toISOString().slice(0, 10);
+}
+
+async function fetchImports() {
+    const response = await fetch("/admin/imports/data");
+    const data = (await response.json()) as {
+        success?: boolean;
+        imports?: ImportRunSummary[];
+        error?: string;
+    };
+
+    if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to load imports.");
+    }
+
+    return data.imports ?? [];
+}
 
 function formatDate(value: string) {
     return new Intl.DateTimeFormat("en-GB", {
@@ -77,6 +99,7 @@ export default function ImportHistoryManager() {
     const [status, setStatus] = useState<LoadStatus>("loading");
     const [message, setMessage] = useState<string | null>(null);
     const [deletingDate, setDeletingDate] = useState<string | null>(null);
+    const [importDate, setImportDate] = useState(getYesterdayDate);
 
     useEffect(() => {
         let isCancelled = false;
@@ -84,19 +107,10 @@ export default function ImportHistoryManager() {
         async function loadImports() {
             try {
                 setStatus("loading");
-                const response = await fetch("/admin/imports/data");
-                const data = (await response.json()) as {
-                    success?: boolean;
-                    imports?: ImportRunSummary[];
-                    error?: string;
-                };
-
-                if (!response.ok || !data.success) {
-                    throw new Error(data.error || "Failed to load imports.");
-                }
+                const importRuns = await fetchImports();
 
                 if (!isCancelled) {
-                    setImports(data.imports ?? []);
+                    setImports(importRuns);
                     setStatus("success");
                     setMessage(null);
                 }
@@ -116,6 +130,48 @@ export default function ImportHistoryManager() {
             isCancelled = true;
         };
     }, []);
+
+    async function refreshImports() {
+        const importRuns = await fetchImports();
+        setImports(importRuns);
+        setStatus("success");
+    }
+
+    async function importData() {
+        if (!importDate) {
+            setStatus("error");
+            setMessage("Choose a report date before importing.");
+            return;
+        }
+
+        setStatus("importing");
+        setMessage(null);
+
+        try {
+            const response = await fetch("/admin/import/yesterday", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ date: importDate }),
+            });
+            const data = (await response.json()) as {
+                success?: boolean;
+                message?: string;
+                error?: string;
+            };
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Failed to import data.");
+            }
+
+            await refreshImports();
+            setMessage(data.message || `Import started for ${importDate}.`);
+        } catch (error) {
+            setStatus("error");
+            setMessage(error instanceof Error ? error.message : "Failed to import data.");
+        }
+    }
 
     async function deleteImport(reportDate: string) {
         setStatus("deleting");
@@ -154,7 +210,31 @@ export default function ImportHistoryManager() {
     return (
         <section className="mt-8 rounded-lg border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-200 p-5">
-                <h2 className="text-xl font-bold text-slate-900">Import History</h2>
+                <h2 className="text-xl font-bold text-slate-900">Import Data</h2>
+
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <label className="block sm:w-56">
+                        <span className="text-sm font-semibold text-slate-700">
+                            Report date
+                        </span>
+                        <input
+                            type="date"
+                            value={importDate}
+                            onChange={(event) => setImportDate(event.target.value)}
+                            disabled={status === "importing"}
+                            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+                        />
+                    </label>
+
+                    <button
+                        type="button"
+                        onClick={importData}
+                        disabled={status === "importing" || !importDate}
+                        className="rounded-lg bg-emerald-700 px-5 py-2.5 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                    >
+                        {status === "importing" ? "Importing..." : "Import Data"}
+                    </button>
+                </div>
             </div>
 
             {message && (
