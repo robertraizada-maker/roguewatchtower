@@ -474,19 +474,20 @@ async function handleImportHistory(request, env, url) {
         imports: data.imports ?? [],
         message: data.message,
     });
-}export async function onRequest(context) {
-    const expectedUsername =
-        context.env.ADMIN_USERNAME || DEFAULT_ADMIN_USERNAME;
-    const expectedPassword = context.env.ADMIN_PASSWORD;
+}
+
+function validateAdminCredentials(request, env) {
+    const expectedUsername = env.ADMIN_USERNAME || DEFAULT_ADMIN_USERNAME;
+    const expectedPassword = env.ADMIN_PASSWORD;
 
     if (!expectedPassword) {
-        return unavailable(context.env);
+        return { configured: false, authenticated: false };
     }
 
-    const credentials = parseBasicAuth(context.request);
+    const credentials = parseBasicAuth(request);
 
     if (!credentials) {
-        return unauthorized();
+        return { configured: true, authenticated: false };
     }
 
     const usernameMatches = timingSafeEqual(
@@ -498,12 +499,31 @@ async function handleImportHistory(request, env, url) {
         expectedPassword
     );
 
-    if (!usernameMatches || !passwordMatches) {
-        return unauthorized();
-    }
+    return {
+        configured: true,
+        authenticated: usernameMatches && passwordMatches,
+    };
+}
 
+export async function onRequest(context) {
     const url = new URL(context.request.url);
     const path = url.pathname.replace(/\/$/, "");
+    const adminSession = validateAdminCredentials(context.request, context.env);
+
+    if (path === "/admin/session") {
+        return json({
+            success: true,
+            authenticated: adminSession.authenticated,
+        });
+    }
+
+    if (!adminSession.configured) {
+        return unavailable(context.env);
+    }
+
+    if (!adminSession.authenticated) {
+        return unauthorized();
+    }
 
     if (path === "/admin/redeploy") {
         return handleRedeploy(context.request, context.env);

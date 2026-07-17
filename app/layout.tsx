@@ -3,6 +3,7 @@ import "./globals.css";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AdminHeaderBar from "@/components/AdminHeaderBar";
 
 const siteUrl = new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://roguewatchtower.com"
@@ -33,6 +34,7 @@ export default function RootLayout({
                 />
             </head>
             <body className="bg-gray-50 text-gray-900">
+                <AdminHeaderBar />
                 <Header />
 
                 <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
