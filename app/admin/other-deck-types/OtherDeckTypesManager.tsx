@@ -18,6 +18,14 @@ interface EditableOtherDeckType {
     criteriaText: string;
 }
 
+interface MetaDeckCriterionRecord {
+    id: string;
+    archetype: string;
+    criteria: OtherDeckType["criteria"];
+    criteriaText?: string;
+    expiresAt?: string;
+}
+
 interface OtherDeckCandidate {
     id: string;
     reportDate: string;
@@ -171,6 +179,7 @@ function loadStoredDeckTypes() {
 
 export default function OtherDeckTypesManager() {
     const [deckTypes, setDeckTypes] = useState<EditableOtherDeckType[]>(loadStoredDeckTypes);
+    const [metaDeckTypes, setMetaDeckTypes] = useState<OtherDeckType[]>([]);
     const [archetype, setArchetype] = useState("");
     const [criteriaText, setCriteriaText] = useState("");
     const [candidates, setCandidates] = useState<OtherDeckCandidate[]>([]);
@@ -199,11 +208,38 @@ export default function OtherDeckTypesManager() {
                 setIsLoadingCandidates(true);
                 setLoadError(null);
 
-                const datesResponse = await fetch(`${baseUrl}/meta/available-dates`);
+                const [datesResponse, metaCriteriaResponse] = await Promise.all([
+                    fetch(`${baseUrl}/meta/available-dates`),
+                    fetch("/admin/meta-deck-criteria/data"),
+                ]);
 
                 if (!datesResponse.ok) {
                     throw new Error("Failed to load available dates.");
                 }
+
+                if (!metaCriteriaResponse.ok) {
+                    throw new Error("Failed to load active meta deck criteria.");
+                }
+
+                const metaCriteriaData = (await metaCriteriaResponse.json()) as {
+                    success?: boolean;
+                    criteria?: MetaDeckCriterionRecord[];
+                    error?: string;
+                };
+
+                if (!metaCriteriaData.success) {
+                    throw new Error(
+                        metaCriteriaData.error ||
+                            "Failed to load active meta deck criteria."
+                    );
+                }
+
+                setMetaDeckTypes(
+                    (metaCriteriaData.criteria ?? []).map((criterion) => ({
+                        archetype: criterion.archetype,
+                        criteria: criterion.criteria,
+                    }))
+                );
 
                 const datesData = (await datesResponse.json()) as AvailableDatesResponse;
                 const dates = (datesData.dates ?? []).slice(0, MAX_DATES_TO_SCAN);
@@ -276,14 +312,15 @@ export default function OtherDeckTypesManager() {
 
     const unclassifiedCandidates = useMemo(
         () =>
-            candidates.filter(
-                (candidate) =>
-                    !findMatchingOtherDeckType(
-                        getPokemonCounts(candidate.decklistExport),
-                        validDeckTypes
-                    )
-            ),
-        [candidates, validDeckTypes]
+            candidates.filter((candidate) => {
+                const pokemonCounts = getPokemonCounts(candidate.decklistExport);
+
+                return (
+                    !findMatchingOtherDeckType(pokemonCounts, validDeckTypes) &&
+                    !findMatchingOtherDeckType(pokemonCounts, metaDeckTypes)
+                );
+            }),
+        [candidates, metaDeckTypes, validDeckTypes]
     );
 
     const nextCandidate = unclassifiedCandidates[0] ?? null;
@@ -345,6 +382,9 @@ export default function OtherDeckTypesManager() {
                     {!isLoadingCandidates && (
                         <p className="mt-4 text-sm text-slate-600">
                             {unclassifiedCandidates.length} Other decks left to review.
+                            {metaDeckTypes.length > 0
+                                ? ` Active meta criteria excluded ${metaDeckTypes.length} deck type${metaDeckTypes.length === 1 ? "" : "s"}.`
+                                : ""}
                         </p>
                     )}
 

@@ -73,6 +73,188 @@ function json(data, init = {}) {
     });
 }
 
+function getApiBaseUrl(env) {
+    return (env.NEXT_PUBLIC_API_BASE_URL || env.API_BASE_URL || "").replace(
+        /\/$/,
+        ""
+    );
+}
+
+function getJsonHeaders(env, headers = {}) {
+    return {
+        "Content-Type": "application/json",
+        ...(env.ADMIN_API_TOKEN
+            ? { Authorization: `Bearer ${env.ADMIN_API_TOKEN}` }
+            : {}),
+        ...headers,
+    };
+}
+
+async function readJson(request) {
+    try {
+        return await request.json();
+    } catch {
+        return null;
+    }
+}
+
+async function proxyJson(request, env, targetUrl, init = {}) {
+    const response = await fetch(targetUrl, {
+        method: init.method || request.method,
+        headers: getJsonHeaders(env, init.headers),
+        body: init.body,
+    });
+    const responseText = await response.text();
+    let data = null;
+
+    try {
+        data = responseText ? JSON.parse(responseText) : null;
+    } catch {
+        data = { message: responseText };
+    }
+
+    if (!response.ok) {
+        return json(
+            {
+                success: false,
+                error:
+                    data?.error ||
+                    data?.message ||
+                    `API request failed with status ${response.status}.`,
+            },
+            { status: response.status }
+        );
+    }
+
+    return data;
+}
+
+function getYesterdayDate() {
+    const date = new Date();
+    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCDate(date.getUTCDate() - 1);
+    return date.toISOString().slice(0, 10);
+}
+
+async function handleMetaDeckCriteria(request, env, url) {
+    const apiBaseUrl = getApiBaseUrl(env);
+
+    if (!apiBaseUrl) {
+        return json(
+            {
+                success: false,
+                error: "NEXT_PUBLIC_API_BASE_URL or API_BASE_URL is not configured.",
+            },
+            { status: 503 }
+        );
+    }
+
+    const criteriaEndpoint =
+        env.META_DECK_CRITERIA_ENDPOINT ||
+        `${apiBaseUrl}/admin/meta-deck-criteria`;
+    const repopulateEndpoint =
+        env.DECK_OF_THE_DAY_REPOPULATE_ENDPOINT ||
+        `${apiBaseUrl}/admin/deck-of-the-day/repopulate`;
+
+    if (request.method === "GET") {
+        const data = await proxyJson(request, env, criteriaEndpoint, {
+            method: "GET",
+            body: undefined,
+        });
+
+        if (data instanceof Response) {
+            return data;
+        }
+
+        return json({
+            success: true,
+            criteria: data.criteria || data.metaDeckCriteria || [],
+        });
+    }
+
+    if (request.method === "DELETE") {
+        const id = url.searchParams.get("id");
+
+        if (!id) {
+            return json(
+                { success: false, error: "Missing criteria id." },
+                { status: 400 }
+            );
+        }
+
+        const deleteUrl = new URL(criteriaEndpoint);
+        deleteUrl.searchParams.set("id", id);
+
+        const data = await proxyJson(request, env, deleteUrl.toString(), {
+            method: "DELETE",
+            body: undefined,
+        });
+
+        if (data instanceof Response) {
+            return data;
+        }
+
+        return json({
+            success: true,
+            criteria: data.criteria || data.metaDeckCriteria || [],
+        });
+    }
+
+    if (request.method !== "POST") {
+        return json(
+            { success: false, error: "Method not allowed." },
+            { status: 405, headers: { Allow: "GET, POST, DELETE" } }
+        );
+    }
+
+    const body = await readJson(request);
+
+    if (!body?.archetype || !Array.isArray(body.criteria)) {
+        return json(
+            {
+                success: false,
+                error: "Add an archetype and at least one criteria line.",
+            },
+            { status: 400 }
+        );
+    }
+
+    const createdAt = new Date();
+    const expiresAt = body.expiresAt
+        ? new Date(body.expiresAt)
+        : new Date(createdAt.getTime() + 28 * 24 * 60 * 60 * 1000);
+    const refreshDate = body.refreshDate || getYesterdayDate();
+    const savePayload = {
+        ...body,
+        createdAt: createdAt.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+    };
+
+    const saveData = await proxyJson(request, env, criteriaEndpoint, {
+        method: "POST",
+        body: JSON.stringify(savePayload),
+    });
+
+    if (saveData instanceof Response) {
+        return saveData;
+    }
+
+    const repopulateData = await proxyJson(request, env, repopulateEndpoint, {
+        method: "POST",
+        body: JSON.stringify({ date: refreshDate }),
+    });
+
+    if (repopulateData instanceof Response) {
+        return repopulateData;
+    }
+
+    return json({
+        success: true,
+        message: `Saved. ${refreshDate} has been queued for repopulation.`,
+        criteria: saveData.criteria || saveData.metaDeckCriteria || [],
+    });
+}
+
 async function handleRedeploy(request, env) {
     if (request.method !== "POST") {
         return json(
@@ -118,6 +300,71 @@ async function handleRedeploy(request, env) {
     });
 }
 
+function withDateParam(endpoint, date) {
+    const replacedEndpoint = endpoint.replace("{date}", encodeURIComponent(date));
+
+    if (replacedEndpoint !== endpoint) {
+        return replacedEndpoint;
+    }
+
+    const url = new URL(replacedEndpoint);
+    url.searchParams.set("date", date);
+    return url.toString();
+}
+
+async function handleYesterdayImport(request, env) {
+    if (request.method !== "POST" && request.method !== "DELETE") {
+        return json(
+            { success: false, error: "Method not allowed." },
+            { status: 405, headers: { Allow: "POST, DELETE" } }
+        );
+    }
+
+    const apiBaseUrl = getApiBaseUrl(env);
+
+    if (!apiBaseUrl) {
+        return json(
+            {
+                success: false,
+                error: "NEXT_PUBLIC_API_BASE_URL or API_BASE_URL is not configured.",
+            },
+            { status: 503 }
+        );
+    }
+
+    const body = await readJson(request);
+    const date = body?.date || getYesterdayDate();
+    const importEndpoint =
+        env.IMPORT_YESTERDAY_ENDPOINT ||
+        env.DAILY_IMPORT_ENDPOINT ||
+        `${apiBaseUrl}/admin/import/yesterday`;
+    const deleteEndpoint =
+        env.DELETE_YESTERDAY_ENDPOINT ||
+        env.DAILY_DELETE_ENDPOINT ||
+        `${apiBaseUrl}/admin/import/yesterday`;
+    const isDelete = request.method === "DELETE";
+    const endpoint = isDelete ? deleteEndpoint : importEndpoint;
+    const targetUrl = isDelete ? withDateParam(endpoint, date) : endpoint;
+    const data = await proxyJson(request, env, targetUrl, {
+        method: request.method,
+        body: isDelete ? undefined : JSON.stringify({ date }),
+    });
+
+    if (data instanceof Response) {
+        return data;
+    }
+
+    return json({
+        success: true,
+        date,
+        message:
+            data?.message ||
+            (isDelete
+                ? `Deleted data for ${date}.`
+                : `Import started for ${date}.`),
+        data,
+    });
+}
 export async function onRequest(context) {
     const expectedUsername =
         context.env.ADMIN_USERNAME || DEFAULT_ADMIN_USERNAME;
@@ -147,9 +394,18 @@ export async function onRequest(context) {
     }
 
     const url = new URL(context.request.url);
+    const path = url.pathname.replace(/\/$/, "");
 
-    if (url.pathname.replace(/\/$/, "") === "/admin/redeploy") {
+    if (path === "/admin/redeploy") {
         return handleRedeploy(context.request, context.env);
+    }
+
+    if (path === "/admin/import/yesterday") {
+        return handleYesterdayImport(context.request, context.env);
+    }
+
+    if (path === "/admin/meta-deck-criteria/data") {
+        return handleMetaDeckCriteria(context.request, context.env, url);
     }
 
     const response = await context.next();

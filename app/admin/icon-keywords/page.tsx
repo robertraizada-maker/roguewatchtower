@@ -1,9 +1,12 @@
+import AdminBreadcrumbs from "../AdminBreadcrumbs";
 import IconKeywordsManager from "./IconKeywordsManager";
 
 export default function IconKeywordsPage() {
     return (
         <main className="min-h-screen bg-white text-slate-900">
             <section className="mx-auto max-w-5xl px-6 py-12">
+                <AdminBreadcrumbs currentPage="Icon Keywords" />
+
                 <h1 className="text-4xl font-bold tracking-tight">
                     Icon Keywords
                 </h1>
