@@ -4,6 +4,31 @@ import { useState } from "react";
 
 type DeployStatus = "idle" | "pending" | "success" | "error";
 
+interface RedeployResponse {
+    success?: boolean;
+    message?: string;
+    error?: string;
+}
+
+async function readRedeployResponse(response: Response): Promise<RedeployResponse> {
+    const responseText = await response.text();
+
+    if (!responseText) {
+        return {};
+    }
+
+    try {
+        return JSON.parse(responseText) as RedeployResponse;
+    } catch {
+        return {
+            success: false,
+            error: response.ok
+                ? "Redeploy returned an unexpected non-JSON response."
+                : `Redeploy failed with status ${response.status}. ${responseText.slice(0, 160)}`,
+        };
+    }
+}
+
 export default function AdminRedeployButton() {
     const [status, setStatus] = useState<DeployStatus>("idle");
     const [message, setMessage] = useState<string | null>(null);
@@ -16,11 +41,7 @@ export default function AdminRedeployButton() {
             const response = await fetch("/admin/redeploy", {
                 method: "POST",
             });
-            const data = (await response.json()) as {
-                success?: boolean;
-                message?: string;
-                error?: string;
-            };
+            const data = await readRedeployResponse(response);
 
             if (!response.ok || !data.success) {
                 throw new Error(data.error || "Redeploy failed.");

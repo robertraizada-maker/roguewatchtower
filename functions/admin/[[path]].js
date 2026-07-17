@@ -280,15 +280,48 @@ async function handleRedeploy(request, env) {
         );
     }
 
-    const deployResponse = await fetch(deployHookUrl, {
-        method: "POST",
-    });
+    let deployUrl;
 
-    if (!deployResponse.ok) {
+    try {
+        deployUrl = new URL(deployHookUrl);
+    } catch {
         return json(
             {
                 success: false,
-                error: `Deploy hook failed with status ${deployResponse.status}.`,
+                error: "CLOUDFLARE_PAGES_DEPLOY_HOOK_URL is not a valid URL.",
+            },
+            { status: 503 }
+        );
+    }
+
+    let deployResponse;
+
+    try {
+        deployResponse = await fetch(deployUrl.toString(), {
+            method: "POST",
+        });
+    } catch (error) {
+        return json(
+            {
+                success: false,
+                error:
+                    error instanceof Error
+                        ? `Deploy hook request failed: ${error.message}`
+                        : "Deploy hook request failed.",
+            },
+            { status: 502 }
+        );
+    }
+
+    if (!deployResponse.ok) {
+        const responseText = await deployResponse.text();
+
+        return json(
+            {
+                success: false,
+                error: responseText
+                    ? `Deploy hook failed with status ${deployResponse.status}: ${responseText.slice(0, 160)}`
+                    : `Deploy hook failed with status ${deployResponse.status}.`,
             },
             { status: 502 }
         );

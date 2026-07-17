@@ -31,7 +31,11 @@ function extractLimitlessDecklist(html: string) {
     return match?.[1]?.trim() || null;
 }
 
-async function fetchWithRetry(url: string, init: RequestInit, attempts = 3) {
+function wait(milliseconds: number) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+async function fetchWithRetry(url: string, init: RequestInit, attempts = 5) {
     let lastResponse: Response | null = null;
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -48,6 +52,8 @@ async function fetchWithRetry(url: string, init: RequestInit, attempts = 3) {
                 throw error;
             }
         }
+
+        await wait(250 * attempt);
     }
 
     return lastResponse;
