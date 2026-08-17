@@ -1,6 +1,7 @@
 import DeckCard from "@/components/DeckCard";
 import DateNavigator from "@/components/DateNavigator";
 import { getRogueDecks } from "@/lib/api";
+import { getDeckDisplayName } from "@/lib/deck-display";
 import { getDeckAnchorId, getRogueRating } from "@/lib/rogue-rating";
 
 interface Props {
@@ -34,7 +35,10 @@ export default async function DecksOfTheDay({ date, availableDates }: Props) {
                         key={index}
                         rank={index + 1}
                         anchorId={getDeckAnchorId(deck, index)}
-                        archetype={deck.deck_name}
+                        archetype={getDeckDisplayName(
+                            deck.deck_name,
+                            deck.decklist_export
+                        )}
                         archetypeIcons={
                             deck.deck_icons ||
                             deck.icon_urls ||

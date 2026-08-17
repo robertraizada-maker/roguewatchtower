@@ -11,10 +11,6 @@ import {
     parseIgnoredIconKeywords,
 } from "@/lib/icon-keywords";
 import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
-import {
-    OTHER_DECK_TYPES_STORAGE_KEY,
-    parseStoredOtherDeckTypes,
-} from "@/lib/other-deck-types";
 
 interface DeckCardProps {
     rank: number;
@@ -45,10 +41,6 @@ function subscribeToStoredOtherDeckTypes(onStoreChange: () => void) {
     window.addEventListener("storage", onStoreChange);
 
     return () => window.removeEventListener("storage", onStoreChange);
-}
-
-function getStoredOtherDeckTypesSnapshot() {
-    return window.localStorage.getItem(OTHER_DECK_TYPES_STORAGE_KEY);
 }
 
 function getStoredIconKeywordsSnapshot() {
@@ -159,15 +151,6 @@ export default function DeckCard({
     const finishPercent = ((standing / players) * 100).toFixed(1);
     const isTopDeckHighlight = highlightTopDeck && rank === 1;
     const isOutlawAward = showOutlawAward && rank === 1 && standing === 1 && players >= 32;
-    const storedOtherDeckTypesSnapshot = useSyncExternalStore(
-        subscribeToStoredOtherDeckTypes,
-        getStoredOtherDeckTypesSnapshot,
-        () => null
-    );
-    const storedOtherDeckTypes = useMemo(
-        () => parseStoredOtherDeckTypes(storedOtherDeckTypesSnapshot),
-        [storedOtherDeckTypesSnapshot]
-    );
     const storedIconKeywordsSnapshot = useSyncExternalStore(
         subscribeToStoredOtherDeckTypes,
         getStoredIconKeywordsSnapshot,
@@ -177,11 +160,7 @@ export default function DeckCard({
         () => parseIgnoredIconKeywords(storedIconKeywordsSnapshot),
         [storedIconKeywordsSnapshot]
     );
-    const displayArchetype = getDeckDisplayName(
-        archetype,
-        decklistExport,
-        storedOtherDeckTypes
-    );
+    const displayArchetype = getDeckDisplayName(archetype, decklistExport);
     const tournamentUrl = getLimitlessTournamentDetailsUrl(tournamentId);
     const iconUrls = getArchetypeIconUrls(
         displayArchetype,
