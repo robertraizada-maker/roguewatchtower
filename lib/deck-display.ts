@@ -1,5 +1,4 @@
 import {
-    findMatchingFeaturedOtherDeckType,
     findMatchingOtherDeckType,
     normalisePokemonName,
     type OtherDeckType,
@@ -146,13 +145,6 @@ export function getDeckDisplayName(
     }
 
     const featuredPokemonNames = getFeaturedPokemonNames(decklistExport);
-    const matchingFeaturedDeckType =
-        findMatchingFeaturedOtherDeckType(featuredPokemonNames);
-
-    if (matchingFeaturedDeckType) {
-        return matchingFeaturedDeckType.archetype;
-    }
-
     if (featuredPokemonNames.length === 0) {
         return deckName;
     }
