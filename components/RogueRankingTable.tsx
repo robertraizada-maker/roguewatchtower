@@ -71,7 +71,7 @@ function getStoredOtherDeckTypesSnapshot() {
 }
 
 export default function RogueRankingTable({ decks, selectedRange }: Props) {
-    const [sortOption, setSortOption] = useState<SortOption>("rogue-ranking");
+    const [sortOption, setSortOption] = useState<SortOption>("finish-percentage");
     const storedOtherDeckTypesSnapshot = useSyncExternalStore(
         subscribeToStoredOtherDeckTypes,
         getStoredOtherDeckTypesSnapshot,
