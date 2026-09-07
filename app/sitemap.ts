@@ -4,6 +4,8 @@ import { filterAccurateReportDates } from "@/lib/accurate-dates";
 import { getArchetypes } from "@/lib/archetypes";
 import { getRankingRangeHref } from "@/lib/ranking-ranges";
 
+import { getPlayers } from "@/lib/players";
+
 export const dynamic = "force-static";
 
 const SITE_URL =
@@ -18,8 +20,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const now = new Date();
     const accurateDates = filterAccurateReportDates(result.dates, now);
     const archetypes = await getArchetypes();
+    const { players } = await getPlayers();
 
     return [
+        { url: absoluteUrl("/players"), lastModified: now, changeFrequency: "daily", priority: 0.8 },
+        ...players.map((player) => ({
+            url: absoluteUrl(`/player/${player.slug}`), lastModified: now,
+            changeFrequency: "daily" as const, priority: 0.6,
+        })),
         {
             url: absoluteUrl("/"),
             lastModified: now,

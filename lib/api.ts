@@ -19,11 +19,11 @@ function hasDecklist(deck: RogueDeck) {
 }
 
 function getLimitlessDecklistUrl(deck: RogueDeck) {
-    if (!deck.tournament_limitless_id || !deck.player_name) {
+    if (!deck.tournament_limitless_id || !deck.player_handle) {
         return null;
     }
 
-    return `https://play.limitlesstcg.com/tournament/${deck.tournament_limitless_id}/player/${encodeURIComponent(deck.player_name)}/decklist`;
+    return `https://play.limitlesstcg.com/tournament/${deck.tournament_limitless_id}/player/${encodeURIComponent(deck.player_handle)}/decklist`;
 }
 
 function extractLimitlessDecklist(html: string) {

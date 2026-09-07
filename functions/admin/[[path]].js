@@ -263,7 +263,8 @@ async function handleRedeploy(request, env) {
         );
     }
 
-    const deployHookUrl = env.CLOUDFLARE_PAGES_DEPLOY_HOOK_URL;
+    const apiBaseUrl = getApiBaseUrl(env);
+    const deployHookUrl = apiBaseUrl ? `${apiBaseUrl}/admin/redeploy` : "";
 
     if (!deployHookUrl) {
         const visibleKeys = Object.keys(env || {})
@@ -274,7 +275,7 @@ async function handleRedeploy(request, env) {
         return json(
             {
                 success: false,
-                error: `CLOUDFLARE_PAGES_DEPLOY_HOOK_URL is not configured. Visible env keys: ${visibleKeys}`,
+                error: `NEXT_PUBLIC_API_BASE_URL or API_BASE_URL is not configured. Visible env keys: ${visibleKeys}`,
             },
             { status: 503 }
         );
@@ -299,6 +300,7 @@ async function handleRedeploy(request, env) {
     try {
         deployResponse = await fetch(deployUrl.toString(), {
             method: "POST",
+            headers: getJsonHeaders(env),
         });
     } catch (error) {
         return json(

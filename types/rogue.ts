@@ -11,6 +11,7 @@ export interface RogueDeck {
     archetype_rank?: number;
     rogue_rating?: number;
     player_name: string;
+    player_handle?: string;
     tournament_name: string;
     tournament_players: number;
     standing: number;

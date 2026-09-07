@@ -8,6 +8,7 @@ const navLinks = [
     { href: "/", label: "Decks of the Day" },
     { href: "/rogue-pokemon-tcg-decks", label: "All Decks" },
     { href: "/rogue-ranking", label: "Rogue Ranking" },
+    { href: "/players", label: "Players" },
 ];
 
 function SearchIcon() {
@@ -80,7 +81,7 @@ export default function Header() {
                     </button>
                 </div>
 
-                <nav className="hidden items-center gap-4 text-base font-medium md:flex lg:gap-8 lg:text-lg">
+                <nav className="hidden items-center gap-3 text-sm font-medium md:flex lg:gap-6 lg:text-lg">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
