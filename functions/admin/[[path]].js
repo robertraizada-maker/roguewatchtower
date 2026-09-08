@@ -114,6 +114,16 @@ async function proxyJson(request, env, targetUrl, init = {}) {
     }
 
     if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+            return json(
+                {
+                    success: false,
+                    error: "The website could not authenticate with the backend API. Please contact the site administrator.",
+                },
+                { status: 502 }
+            );
+        }
+
         return json(
             {
                 success: false,
