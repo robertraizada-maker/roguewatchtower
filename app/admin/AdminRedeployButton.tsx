@@ -24,7 +24,7 @@ async function readRedeployResponse(response: Response): Promise<RedeployRespons
             success: false,
             error: response.ok
                 ? "Redeploy returned an unexpected non-JSON response."
-                : `Redeploy failed with status ${response.status}. ${responseText.slice(0, 160)}`,
+                : `The redeploy service returned an unexpected response (HTTP ${response.status}). Please try again shortly.`,
         };
     }
 }
