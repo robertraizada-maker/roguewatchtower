@@ -4,7 +4,7 @@ import test from 'node:test';
 import ts from 'typescript';
 const source = ts.transpileModule(readFileSync(new URL('../lib/player-standings.ts', import.meta.url), 'utf8'), {compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const { buildPlayerStandings, getPlayerSlug, getPlayerWindow, getPlayerMedal } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
-const deck = (id, dailyRank, reportDate='2026-09-04', extra={}) => ({player_id:id,player_name:`Player ${id}`,player_handle:`player${id}`,dailyRank,reportDate,...extra});
+const deck = (id, dailyRank, reportDate='2026-09-04', extra={}) => ({player_id:id,player_name:`Player ${id}`,player_handle:`player${id}`,dailyRank,reportDate,standing:10,tournament_players:100,...extra});
 
 test('awards the requested points for daily positions, independently of tournament placing', () => {
  const players=buildPlayerStandings([1,2,3,4,5].map(rank=>deck(rank,rank,'2026-09-04',{standing:99})), '2026-09-04');
@@ -38,11 +38,11 @@ test('handles empty periods and refuses to merge players without IDs', () => {
  assert.throws(()=>buildPlayerStandings([deck(undefined,1)],'2026-09-04'),/player ID/);
 });
 
-test('equal points favor best daily finish before recency or name', () => {
- const players=buildPlayerStandings([deck(1,2),deck(1,3),deck(2,1,'2026-09-03',{standing:99})],'2026-09-04');
+test('equal points favor lowest tournament percentage before daily finish or recency', () => {
+ const players=buildPlayerStandings([deck(1,2),deck(1,3,'2026-09-03',{standing:17,tournament_players:1000}),deck(2,1,'2026-09-04',{standing:25,tournament_players:1000})],'2026-09-04');
  assert.deepEqual(players.map(p=>p.points),[8,8]);
- assert.deepEqual(players.map(p=>p.id),[2,1]);
- assert.deepEqual(players.map(p=>p.bestFinish),[1,2]);
+ assert.deepEqual(players.map(p=>p.id),[1,2]);
+ assert.deepEqual(players.map(p=>Number(p.bestFinishPercentage.toFixed(1))),[1.7,2.5]);
  assert.deepEqual(players.map(p=>p.rank),[1,2]);
 });
 test('equal points and best finishes favor the most recent appearance', () => {

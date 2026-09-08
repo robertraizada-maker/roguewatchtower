@@ -21,7 +21,7 @@ export default async function PlayersPage() {
             <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
                 <h2 className="font-semibold">Points per daily appearance</h2>
                 <p className="mt-2 text-slate-600">🥇 1st: 8 · 🥈 2nd: 5 · 🥉 3rd: 3 · 4th: 2 · 5th: 1</p>
-                <p className="mt-2 text-sm text-slate-500">Points reflect Decks of the Day positions. Equal points are decided by best daily position, then most recent appearance. Best Finish (%) shows the lowest tournament placing percentage across the featured decks for each player in this period; lower is better.</p>
+                <p className="mt-2 text-sm text-slate-500">Points reflect Decks of the Day positions. Equal points are decided by lowest Best Finish (%), then most recent appearance. Best Finish (%) shows the lowest tournament placing percentage across the featured decks for each player in this period; lower is better.</p>
             </div>
             {players.length === 0 ? <p className="rounded-xl border border-gray-200 bg-white p-6 text-slate-600">No featured players in this period yet.</p> : (
                 <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
@@ -41,7 +41,7 @@ export default async function PlayersPage() {
                                     <td className="whitespace-nowrap px-3 py-4 font-semibold sm:px-5"><span aria-hidden="true">{getPlayerMedal(player.rank)} </span>{player.rank}</td>
                                     <th scope="row" className="min-w-40 px-3 py-4 font-semibold sm:px-5"><Link className="text-emerald-800 hover:underline" href={`/player/${player.slug}`}>{player.name}</Link></th>
                                     <td className="px-3 py-4 text-right font-bold tabular-nums sm:px-5">{player.points}</td>
-                                    <td className="px-3 py-4 text-right tabular-nums sm:px-5">{Math.min(...player.decks.map((deck) => (deck.standing / deck.tournament_players) * 100)).toFixed(1)}%</td>
+                                    <td className="px-3 py-4 text-right tabular-nums sm:px-5">{player.bestFinishPercentage.toFixed(1)}%</td>
                                 </tr>
                             ))}
                         </tbody>

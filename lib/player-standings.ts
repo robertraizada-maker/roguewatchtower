@@ -9,6 +9,7 @@ export interface PlayerStanding {
     name: string;
     points: number;
     bestFinish: number;
+    bestFinishPercentage: number;
     rank: number;
     wins: number;
     decks: RankingDeck[];
@@ -39,17 +40,19 @@ export function buildPlayerStandings(decks: RankingDeck[], endDate: string): Pla
         if (!player) {
             player = {
                 id: deck.player_id, slug: getPlayerSlug(deck.player_id, deck.player_handle),
-                name: deck.player_name, points: 0, bestFinish: deck.dailyRank, rank: 0, wins: 0, decks: [],
+                name: deck.player_name, points: 0, bestFinish: deck.dailyRank,
+                bestFinishPercentage: (deck.standing / deck.tournament_players) * 100, rank: 0, wins: 0, decks: [],
             };
             players.set(player.id, player);
         }
+        player.bestFinishPercentage = Math.min(player.bestFinishPercentage, (deck.standing / deck.tournament_players) * 100);
         player.points += PLAYER_POINTS[deck.dailyRank - 1];
         player.bestFinish = Math.min(player.bestFinish, deck.dailyRank);
         player.wins += Number(deck.dailyRank === 1);
         player.decks.push(deck);
     }
     const standings = [...players.values()].sort((a, b) =>
-        b.points - a.points || a.bestFinish - b.bestFinish ||
+        b.points - a.points || a.bestFinishPercentage - b.bestFinishPercentage ||
         b.decks[0].reportDate.localeCompare(a.decks[0].reportDate) ||
         a.name.localeCompare(b.name) || a.id - b.id
     );
