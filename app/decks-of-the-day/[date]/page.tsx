@@ -18,7 +18,7 @@ function formatDateForTitle(date: string) {
 }
 
 export async function generateStaticParams() {
-    const result = await getAvailableDates();
+    const result = await getAvailableDates(true);
 
     if (result.dates.length === 0) {
         throw new Error(

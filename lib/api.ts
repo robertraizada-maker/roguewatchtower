@@ -124,9 +124,9 @@ export async function getRogueDecks(
     };
 }
 
-export async function getAvailableDates(): Promise<AvailableDatesResponse> {
+export async function getAvailableDates(allTime = false): Promise<AvailableDatesResponse> {
     const response = await fetchWithRetry(
-        `${API_BASE_URL}/meta/available-dates?build=${BUILD_CACHE_KEY}`,
+        `${API_BASE_URL}/meta/available-dates?build=${BUILD_CACHE_KEY}${allTime ? "&range=all" : ""}`,
         {
             cache: "force-cache",
         }

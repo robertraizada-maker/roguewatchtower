@@ -6,12 +6,12 @@ import { getRogueRating } from "@/lib/rogue-rating";
 
 export const metadata: Metadata = {
     title: "Search Rogue Pokemon TCG Decks",
-    description: "Search recent rogue Pokemon TCG decklists by Pokemon name.",
+    description: "Search rogue Pokemon TCG decklists by Pokemon name.",
 };
 
 async function getSearchableDecks(): Promise<SearchableDeck[]> {
-    const availableDates = await getAvailableDates();
-    const dates = availableDates.dates.slice(0, 28);
+    const availableDates = await getAvailableDates(true);
+    const dates = availableDates.dates;
     const dailyResults = await Promise.all(
         dates.map(async (date) => ({
             date,
@@ -31,6 +31,9 @@ async function getSearchableDecks(): Promise<SearchableDeck[]> {
 
 export default async function SearchPage() {
     const decks = await getSearchableDecks();
+    const cutoff = new Date();
+    cutoff.setUTCDate(cutoff.getUTCDate() - 27);
+    const recentCutoffDate = cutoff.toISOString().slice(0, 10);
 
     return (
         <main className="space-y-6">
@@ -40,12 +43,12 @@ export default async function SearchPage() {
                 </h1>
 
                 <p className="mt-3 max-w-none text-slate-600">
-                    Search recent rogue decklists by Pokemon name and jump
+                    Search rogue decklists by Pokemon name and jump
                     straight to the matching decklist.
                 </p>
             </div>
 
-            <DeckSearch decks={decks} />
+            <DeckSearch decks={decks} recentCutoffDate={recentCutoffDate} />
         </main>
     );
 }

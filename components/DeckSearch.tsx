@@ -20,6 +20,7 @@ export type SearchableDeck = RogueDeck & {
 
 interface Props {
     decks: SearchableDeck[];
+    recentCutoffDate: string;
 }
 
 interface SearchResult {
@@ -120,7 +121,8 @@ function searchDecks(decks: SearchableDeck[], query: string): SearchResult[] {
         });
 }
 
-export default function DeckSearch({ decks }: Props) {
+export default function DeckSearch({ decks, recentCutoffDate }: Props) {
+    const [last28Days, setLast28Days] = useState(true);
     const [query, setQuery] = useState("");
     const [selectedPokemon, setSelectedPokemon] = useState("");
     const storedOtherDeckTypesSnapshot = useSyncExternalStore(
@@ -132,9 +134,15 @@ export default function DeckSearch({ decks }: Props) {
         () => parseStoredOtherDeckTypes(storedOtherDeckTypesSnapshot),
         [storedOtherDeckTypesSnapshot]
     );
-    const availablePokemon = useMemo(() => getAvailablePokemon(decks), [decks]);
+    const filteredDecks = useMemo(
+        () => last28Days
+            ? decks.filter((deck) => deck.reportDate >= recentCutoffDate)
+            : decks,
+        [decks, last28Days, recentCutoffDate]
+    );
+    const availablePokemon = useMemo(() => getAvailablePokemon(filteredDecks), [filteredDecks]);
     const activeQuery = selectedPokemon || query;
-    const results = useMemo(() => searchDecks(decks, activeQuery), [decks, activeQuery]);
+    const results = useMemo(() => searchDecks(filteredDecks, activeQuery), [filteredDecks, activeQuery]);
     const hasSearch = activeQuery.trim().length >= 2;
 
     return (
@@ -175,6 +183,24 @@ export default function DeckSearch({ decks }: Props) {
                         </select>
                     </label>
                 </div>
+                <label className="mt-4 flex w-fit cursor-pointer items-center gap-2 text-sm font-bold text-slate-700">
+                    <input
+                        type="checkbox"
+                        checked={last28Days}
+                        onChange={(event) => {
+                            setLast28Days(event.target.checked);
+                            if (selectedPokemon) {
+                                setQuery(selectedPokemon);
+                                setSelectedPokemon("");
+                            }
+                        }}
+                        className="h-4 w-4 accent-emerald-800"
+                    />
+                    Last 28 days
+                </label>
+                <p className="mt-2 text-sm text-slate-600">
+                    {last28Days ? "Searching the last 28 days. Uncheck to search all time." : "Searching all time."}
+                </p>
             </div>
 
             {hasSearch && (
@@ -277,7 +303,7 @@ export default function DeckSearch({ decks }: Props) {
                         {!hasSearch && (
                             <tr>
                                 <td className="px-4 py-6 text-slate-500" colSpan={7}>
-                                    Enter a Pokemon name, or choose one from the list, to search recent rogue decklists.
+                                    Enter a Pokemon name, or choose one from the list, to search rogue decklists.
                                 </td>
                             </tr>
                         )}
