@@ -10,7 +10,7 @@ import {
     ICON_KEYWORDS_STORAGE_KEY,
     parseIgnoredIconKeywords,
 } from "@/lib/icon-keywords";
-import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
+import { getLimitlessTournamentStandingsUrl } from "@/lib/limitless";
 
 interface DeckCardProps {
     rank: number;
@@ -161,7 +161,7 @@ export default function DeckCard({
         [storedIconKeywordsSnapshot]
     );
     const displayArchetype = getDeckDisplayName(archetype, decklistExport);
-    const tournamentUrl = getLimitlessTournamentDetailsUrl(tournamentId);
+    const tournamentUrl = getLimitlessTournamentStandingsUrl(tournamentId);
     const iconUrls = getArchetypeIconUrls(
         displayArchetype,
         archetypeIcons,

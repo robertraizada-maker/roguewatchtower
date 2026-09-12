@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 import { getDeckDisplayName } from "@/lib/deck-display";
-import { getLimitlessTournamentDetailsUrl } from "@/lib/limitless";
+import { getLimitlessTournamentStandingsUrl } from "@/lib/limitless";
 import {
     OTHER_DECK_TYPES_STORAGE_KEY,
     parseStoredOtherDeckTypes,
@@ -270,9 +270,9 @@ export default function DeckSearch({ decks, recentCutoffDate }: Props) {
                                     {deck.player_name}
                                 </td>
                                 <td className="px-4 py-4 text-slate-700">
-                                    {getLimitlessTournamentDetailsUrl(deck.tournament_limitless_id ?? deck.tournament_id) ? (
+                                    {getLimitlessTournamentStandingsUrl(deck.tournament_limitless_id ?? deck.tournament_id) ? (
                                         <a
-                                            href={getLimitlessTournamentDetailsUrl(deck.tournament_limitless_id ?? deck.tournament_id) ?? undefined}
+                                            href={getLimitlessTournamentStandingsUrl(deck.tournament_limitless_id ?? deck.tournament_id) ?? undefined}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="font-semibold text-emerald-800 hover:underline"
