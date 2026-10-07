@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import Header from "@/components/Header";
+import HeaderBannerAd from "@/components/HeaderBannerAd";
 import Footer from "@/components/Footer";
 import AdminHeaderBar from "@/components/AdminHeaderBar";
 
@@ -41,6 +42,7 @@ export default function RootLayout({
             <body className="bg-gray-50 text-gray-900">
                 <AdminHeaderBar />
                 <Header />
+                <HeaderBannerAd />
 
                 <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
                     {children}
