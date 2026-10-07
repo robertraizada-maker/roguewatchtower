@@ -21,7 +21,7 @@ function BannerUnit() {
     }, []);
 
     return (
-        <aside aria-label="Advertisement" className="mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6">
+        <aside aria-label="Advertisement" className="header-banner-ad mx-auto w-full max-w-7xl px-4 sm:px-6">
             <ins
                 ref={ad}
                 className="adsbygoogle"

@@ -99,3 +99,19 @@ html[data-theme="dark"] textarea {
     padding: 0 !important;
   }
 }
+
+/* Retain measurable width for responsive ads without reserving empty space. */
+.header-banner-ad {
+  max-height: 0;
+  overflow: hidden;
+}
+
+.header-banner-ad:has(ins[data-ad-status="filled"]) {
+  max-height: none;
+  overflow: visible;
+  padding-top: 1rem;
+}
+
+.header-banner-ad ins[data-ad-status="unfilled"] {
+  display: none !important;
+}
