@@ -28,6 +28,11 @@ export default function RootLayout({
         <html lang="en" data-theme="light" suppressHydrationWarning>
             <head>
                 <script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7835770856697607"
+                    crossOrigin="anonymous"
+                />
+                <script
                     dangerouslySetInnerHTML={{
                         __html: `try{var t=localStorage.getItem("roguewatchtower:theme");document.documentElement.dataset.theme=t==="dark"?"dark":"light"}catch{}`,
                     }}
