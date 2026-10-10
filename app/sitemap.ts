@@ -23,6 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { players } = await getPlayers();
 
     return [
+        { url: absoluteUrl("/2-liners"), lastModified: now, changeFrequency: "daily", priority: 0.8 },
         { url: absoluteUrl("/players"), lastModified: now, changeFrequency: "daily", priority: 0.8 },
         ...players.map((player) => ({
             url: absoluteUrl(`/player/${player.slug}`), lastModified: now,
